@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Appointment;
-use App\User;
+use App\Models\User;
 use App\Models\Doctor;
 use App\Notifications\StatusNotification;
 

@@ -18,7 +18,6 @@ use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\TreatmentLogController;
 
 
-
 // AUTHENTICATION ROUTES
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
