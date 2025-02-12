@@ -11,7 +11,7 @@ class AppointmentController extends Controller
 {
     public function index()
     {
-        $appointments = Appointment::where('doctorID', Auth::id())->get();
+        $appointments = Appointment::where('id', Auth::id())->get();
         return view('doctor.appointment.index', compact('appointments'));
     }
 
@@ -22,14 +22,14 @@ class AppointmentController extends Controller
     public function store(Request $request)
     {
         // Kiểm tra nếu bác sĩ tồn tại
-        $doctor = Doctor::where('doctorID', $request->doctorID)->first();
+        $doctor = Doctor::where('id', $request->doctorID)->first();
         if (!$doctor) {
             return redirect()->back()->with('error', 'Bác sĩ không tồn tại.');
         }
         
         try {
             $request->validate([
-                'doctorID' => 'required|exists:doctors,doctorID',
+                'id' => 'required|exists:doctors,id',
                 'date' => 'required|date|after_or_equal:today',
                 'time' => 'required',
                 'consultation_type' => 'required|in:Online,Offline,Home',
@@ -42,7 +42,7 @@ class AppointmentController extends Controller
 
             $appointment = Appointment::create([
                 'userID' => Auth::id(),
-                'doctorID' => $request->doctorID,
+                'id' => $request->doctorID,
                 'date' => $request->date,
                 'time' => $request->time,
                 'consultation_type' => $request->consultation_type,
@@ -63,7 +63,7 @@ class AppointmentController extends Controller
     
     public function create($id)
     {
-        $doctor = Doctor::where('doctorID', $id)->firstOrFail();
+        $doctor = Doctor::where('id', $id)->firstOrFail();
         return view('frontend.pages.appointment_form', compact('doctor'));
     }
     

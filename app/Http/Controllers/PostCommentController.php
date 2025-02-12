@@ -183,7 +183,7 @@ class PostCommentController extends Controller
             $user = auth()->user();
 
             // Kiểm tra nếu người dùng là bác sĩ (tìm bác sĩ trong bảng Doctors)
-            $doctor = Doctor::where('doctorID', $user->id)->first(); // Kiểm tra nếu là bác sĩ
+            $doctor = Doctor::where('id', $user->id)->first(); // Kiểm tra nếu là bác sĩ
 
             if ($doctor) {
                 // Nếu là bác sĩ, lưu doctorID vào user_id
@@ -264,7 +264,7 @@ class PostCommentController extends Controller
             $user = auth()->user();
 
             // Kiểm tra nếu người dùng là bác sĩ (tìm bác sĩ trong bảng Doctors)
-            $doctor = Doctor::where('doctorID', $user->id)->first(); // Kiểm tra nếu là bác sĩ
+            $doctor = Doctor::where('id', $user->id)->first(); // Kiểm tra nếu là bác sĩ
 
             if ($doctor) {
                 // Nếu là bác sĩ, lưu doctorID vào user_id

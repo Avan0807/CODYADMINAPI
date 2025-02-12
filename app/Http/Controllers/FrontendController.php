@@ -538,7 +538,7 @@ class FrontendController extends Controller
             'phone' => 'required|digits:10',
             'date' => 'required|date',
             'time' => 'required',
-            'doctor_id' => 'required|exists:doctorID',
+            'doctor_id' => 'required|exists:id',
             'consultation_type' => 'required|in:Online,In-Person',
             'note' => 'nullable|string|max:500',
         ]);
