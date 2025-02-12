@@ -8,7 +8,6 @@ use App\Models\Doctor;
 class Booking extends Model
 {
     // Tên bảng trong cơ sở dữ liệu
-    protected $table = 'Appointment';
     
     // Các cột có thể điền dữ liệu (mass assignment)
     protected $fillable = [
@@ -16,7 +15,7 @@ class Booking extends Model
         'phone',
         'date',
         'time',
-        'doctorID', // Sửa từ 'doctor_id' thành 'doctorID' để khớp với cơ sở dữ liệu
+        'doctor_id', // Sửa từ 'doctor_id' thành 'doctorID' để khớp với cơ sở dữ liệu
         'status',
         'consultation_type', // Thêm cột này
         'note', // Thêm cột này
@@ -28,6 +27,6 @@ class Booking extends Model
     public function doctor()
     {
         // Khóa ngoại là 'doctorID', liên kết với cột 'doctorID' trong bảng Doctors
-        return $this->belongsTo(Doctor::class, 'doctorID', 'doctorID');
+        return $this->belongsTo(Doctor::class, 'doctor_id', 'id');
     }
 }
