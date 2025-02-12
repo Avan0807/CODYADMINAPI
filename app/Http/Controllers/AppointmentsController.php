@@ -22,10 +22,11 @@ class AppointmentsController extends Controller
             'doctor_id' => 'required|exists:doctors,id',
             'user_id' => 'required|exists:users,id',
             'date' => 'required|date|after_or_equal:today',
-            'time' => 'required|date_format:H:i:s',
+            'time' => 'required|date_format:H:i', // Đảm bảo giờ đúng định dạng
+            'consultation_type' => 'required|in:Online,Offline,At Home', // Kiểm tra giá trị hợp lệ
             'notes' => 'nullable|string',
         ]);
-
+        
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -43,6 +44,7 @@ class AppointmentsController extends Controller
                 'status' => 'Chờ duyệt',
                 'approval_status' => 'Chờ duyệt',
                 'notes' => $request->notes,
+                'consultation_type' => $request->consultation_type, // Lưu loại cuộc hẹn
             ]);
 
             return response()->json([
@@ -74,7 +76,6 @@ class AppointmentsController extends Controller
                 'appointments' => $appointments,
             ], 200);
         } catch (\Exception $e) {
-            // Xử lý lỗi
             return response()->json([
                 'success' => false,
                 'message' => 'Không thể lấy danh sách cuộc hẹn.',
@@ -152,7 +153,7 @@ class AppointmentsController extends Controller
             $appointment->status = 'Đã hủy';
             $appointment->save();
     
-            // ✅ Gửi thông báo cho bệnh nhân
+            // Gửi thông báo cho bệnh nhân
             $user = User::find($appointment->user_id);
             if ($user) {
                 $user->notify(new StatusNotification([
@@ -163,7 +164,7 @@ class AppointmentsController extends Controller
                 ]));
             }
     
-            // ✅ Gửi thông báo cho bác sĩ
+            // Gửi thông báo cho bác sĩ
             $doctor = Doctor::find($appointment->doctor_id);
             if ($doctor) {
                 $doctor->notify(new StatusNotification([
@@ -182,6 +183,7 @@ class AppointmentsController extends Controller
             return response()->json(['message' => 'Không thể hủy lịch khám.', 'error' => $e->getMessage()], 500);
         }
     }
+
     
 
     // Xác nhận lịch hẹn
