@@ -16,7 +16,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\TreatmentLogController;
-
+use App\Http\Controllers\Api\ApiNotificationController;
 
 // AUTHENTICATION ROUTES
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -165,3 +165,7 @@ Route::middleware('auth:sanctum')->post('/treatment-logs/{medical_record_id}/cre
 Route::middleware('auth:sanctum')->delete('/treatment-logs/{id}', [TreatmentLogController::class, 'apiDeleteTreatmentLog']);
 
 
+// =================== NOTIFICATION ROUTES ===================
+Route::get('notifications', [ApiNotificationController::class, 'index']);
+Route::get('notifications/{id}', [ApiNotificationController::class, 'show']);
+Route::delete('notifications/{id}', [ApiNotificationController::class, 'delete']);
