@@ -12,7 +12,7 @@ use App\Models\Cart;
 use App\Models\Brand;
 use App\Models\Booking;
 use App\Models\Doctor;
-use App\Models\User;
+use App\User;
 use Auth;
 use Session;
 use Newsletter;

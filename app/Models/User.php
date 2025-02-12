@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Appointment;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -27,6 +25,7 @@ class User extends Authenticatable
         'status',
         'provider',
         'provider_id',
+        'address' // Thêm dòng này để Laravel chấp nhận lưu `address`
     ];
 
     /**
@@ -49,13 +48,19 @@ class User extends Authenticatable
         'phone_verified_at' => 'datetime',
     ];
 
+    /**
+     * Quan hệ với bảng `orders`
+     */
     public function orders()
     {
         return $this->hasMany('App\Models\Order');
     }
 
-    public function appointments()
+    /**
+     * Xác thực Token API sử dụng Laravel Sanctum.
+     */
+    public function createSanctumToken()
     {
-        return $this->hasMany(Appointment::class, 'userID', 'id');
+        return $this->createToken('AuthToken')->plainTextToken;
     }
 }

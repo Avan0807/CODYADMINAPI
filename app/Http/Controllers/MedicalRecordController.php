@@ -48,7 +48,7 @@ class MedicalRecordController extends Controller
     public function apiGetAllMedicalRecordsByUser($userId)
     {
         try {
-            $medicalRecords = MedicalRecord::select('id', 'user_id', 'doctor_id', 'diagnosis', 'treatment_plan')
+            $medicalRecords = MedicalRecord::select('id', 'user_id', 'doctor_id', 'diagnosis', 'notes')
                 ->where('user_id', $userId) // Lọc theo user_id
                 ->with(['doctor:id,name']) // Chỉ lấy thông tin bác sĩ cần thiết
                 ->get();
@@ -90,16 +90,16 @@ class MedicalRecordController extends Controller
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id', // ID bệnh nhân phải tồn tại trong bảng `users`
             'diagnosis' => 'required|string|max:1000', // Chẩn đoán phải có
-            'treatment_plan' => 'required|string|max:1000', // Kế hoạch điều trị phải có
+            'notes' => 'required|string|max:1000', // Kế hoạch điều trị phải có
         ]);
 
         try {
             // Tạo bệnh án mới với doctor_id lấy từ thông tin bác sĩ đã đăng nhập
             $medicalRecord = MedicalRecord::create([
                 'user_id' => $validated['user_id'], // ID bệnh nhân
-                'doctor_id' => $doctor->doctorID, // Lấy doctorID từ thông tin bác sĩ đã đăng nhập
+                'doctor_id' => $doctor->id, // Lấy doctorID từ thông tin bác sĩ đã đăng nhập
                 'diagnosis' => $validated['diagnosis'], // Chẩn đoán
-                'treatment_plan' => $validated['treatment_plan'], // Kế hoạch điều trị
+                'notes' => $validated['notes'], // Kế hoạch điều trị
             ]);
 
             return response()->json([
@@ -139,7 +139,7 @@ class MedicalRecordController extends Controller
         }
 
         // Kiểm tra quyền của bác sĩ (nếu cần) - Ví dụ: chỉ bác sĩ đã tạo bệnh án mới được xóa
-        if ($medicalRecord->doctor_id !== $doctor->doctorID) {
+        if ($medicalRecord->doctor_id !== $doctor->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Bạn không có quyền xóa bệnh án này!',

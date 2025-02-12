@@ -56,6 +56,14 @@ Route::get('/alldoctors', [DoctorsController::class, 'apiGetAllDoctors']);
 Route::get('/doctors/{doctorID}', [DoctorsController::class, 'apiGetDoctorsByDoctorId']);
 //get user infor by id
 Route::middleware('auth:sanctum')->get('/patient-info/{id}', [DoctorsController::class, 'apiGetPatientInfo']);
+// Lấy thông báo cho doctor 
+Route::middleware('auth:sanctum')->get('/doctor/notifications/{doctorID}', [DoctorsController::class, 'getNotifications']);
+// thông báo đã đọc
+Route::middleware('auth:sanctum')->put('/doctor/notifications/{notificationID}/read', [DoctorsController::class, 'markNotificationAsRead']);
+// thông báo chưa đọc 
+Route::middleware('auth:sanctum')->get('/doctor/notifications/{doctorID}/unread', [DoctorsController::class, 'getUnreadNotifications']);
+// xóa thông báo
+Route::middleware('auth:sanctum')->delete('/doctor/notifications/{notificationID}/delete', [DoctorsController::class, 'deleteNotification']);
 
 
 
@@ -82,10 +90,13 @@ Route::post('appointments/{userID}/create', [AppointmentsController::class, 'api
 //Update status
 Route::put('/appointments/{appointmentID}/confirm', [AppointmentsController::class, 'apiConfirmAppointment']);
 Route::put('/appointments/{appointmentID}/complete', [AppointmentsController::class, 'apiCompleteAppointment']);
+Route::put('/appointments/{userID}/{appointmentID}/cancel', [AppointmentsController::class, 'apiCancelAppointment']);
+
 //Get appointmet buy DoctorID
 Route::get('/appointments/doctor/{doctorID}/all', [AppointmentsController::class, 'apiGetAllAppointmentsByDoctor']);
 Route::get('/appointments/doctor/{doctorID}/recent', [AppointmentsController::class, 'apiGetRecentAppointments']);
 Route::delete('/appointments/{appointmentID}/reject', [AppointmentsController::class, 'apiDeleteAppointment']);
+
 
 
 // CART ROUTES
@@ -153,3 +164,5 @@ Route::middleware('auth:sanctum')->get('/treatment-logs/{id}', [TreatmentLogCont
 Route::middleware('auth:sanctum')->post('/treatment-logs/{medical_record_id}/create', [TreatmentLogController::class, 'apiCreateTreatmentLog']);
 //Delete
 Route::middleware('auth:sanctum')->delete('/treatment-logs/{id}', [TreatmentLogController::class, 'apiDeleteTreatmentLog']);
+
+

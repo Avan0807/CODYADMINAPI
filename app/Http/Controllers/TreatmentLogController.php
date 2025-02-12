@@ -26,7 +26,7 @@ class TreatmentLogController extends Controller
 
         // Tìm tất cả bản ghi điều trị cho medical_record_id
         $treatmentLogs = TreatmentLog::where('medical_record_id', $medical_record_id)
-            ->orderBy('date', 'desc')
+            ->orderBy('treatment_date', 'desc')
             ->get();
 
         // Kiểm tra nếu không tìm thấy bản ghi điều trị
@@ -81,10 +81,10 @@ class TreatmentLogController extends Controller
         }
 
         // Kiểm tra nếu doctorID trong bảng Doctors trùng với ID của người đăng nhập
-        $doctorRecord = Doctor::find($doctor->doctorID);
+        $doctorRecord = Doctor::find($doctor->id);
 
         // Nếu không tìm thấy bác sĩ trong bảng Doctors hoặc ID không khớp
-        if (!$doctorRecord || $doctorRecord->doctorID != $doctor->doctorID) {
+        if (!$doctorRecord || $doctorRecord->id != $doctor->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Token không hợp lệ hoặc bác sĩ không có quyền thao tác!',
@@ -103,7 +103,7 @@ class TreatmentLogController extends Controller
         // Xác thực dữ liệu đầu vào từ request
         $validated = $request->validate([
             'description' => 'required|string|max:1000', // Mô tả điều trị là bắt buộc
-            'date' => 'required|date', // Ngày điều trị là bắt buộc
+            'treatment_date' => 'required|date', // Ngày điều trị là bắt buộc
         ]);
 
         // Tạo log điều trị mới
@@ -111,7 +111,7 @@ class TreatmentLogController extends Controller
             $treatmentLog = TreatmentLog::create([
                 'medical_record_id' => $medical_record_id, // Lưu medical_record_id
                 'description' => $validated['description'], // Mô tả điều trị
-                'date' => $validated['date'], // Ngày điều trị
+                'treatment_date' => $validated['treatment_date'], // Ngày điều trị
             ]);
 
             return response()->json([
@@ -165,7 +165,7 @@ class TreatmentLogController extends Controller
         }
 
         // Kiểm tra nếu bác sĩ không phải là người tạo bệnh án này
-        if ($medicalRecord->doctor_id != $doctor->doctorID) {
+        if ($medicalRecord->doctor_id != $doctor->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Bạn không có quyền xóa log điều trị này!',

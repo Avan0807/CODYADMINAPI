@@ -2,49 +2,35 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
 
 class Doctor extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, HasApiTokens, Notifiable;
 
-
-    protected $table = 'Doctors';
-
-    protected $primaryKey = 'doctorID';
-    public $incrementing = true;
-    protected $keyType = 'int';
-    public $timestamps = true;
+    protected $table = 'doctors';
 
     protected $fillable = [
-        'name',
-        'specialization',
-        'experience',
-        'working_hours',
-        'location',
-        'phone',
-        'email',
-        'photo',
-        'status',
-        'rating',
-        'bio',
-        'services',
-        'workplace',
-        'education',
-        'consultation_fee',
-        'password',
+        'name', 'specialization', 'services', 'experience', 'working_hours',
+        'location', 'workplace', 'phone', 'email', 'photo', 'status',
+        'rating', 'consultation_fee', 'bio', 'password', 'points'
     ];
 
     protected $hidden = [
         'password',
     ];
 
+    protected $casts = [
+        'rating' => 'decimal:2',
+        'consultation_fee' => 'decimal:2',
+    ];
+
+    // 🔹 Bổ sung quan hệ với `Appointment`
     public function appointments()
     {
-        return $this->hasMany(Appointment::class, 'doctorID', 'doctorID');
+        return $this->hasMany(Appointment::class, 'doctor_id');
     }
 }

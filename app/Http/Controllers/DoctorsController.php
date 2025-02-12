@@ -264,7 +264,7 @@ class DoctorsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'Doctors' => $doctors,
+                'doctors' => $doctors,
             ], 200);
         } catch (\Exception $e) {
             \Log::error('Error in fetching doctors: ' . $e->getMessage());
@@ -279,7 +279,7 @@ class DoctorsController extends Controller
     public function apigetDoctorsByDoctorId($doctorID)
     {
         try {
-            $doctors = Doctor::where('doctorID', $doctorID)->get();
+            $doctors = Doctor::where('id', $doctorID)->get();
 
             if ($doctors->isEmpty()) {
                 return response()->json([
@@ -314,8 +314,8 @@ class DoctorsController extends Controller
         }
 
         // 3. Kiểm tra xem bác sĩ này có lịch hẹn với bệnh nhân không
-        $appointment = Appointment::where('doctorID', $doctor->doctorID) // Kiểm tra bác sĩ có lịch hẹn không
-            ->where('userID', $id) // Kiểm tra bệnh nhân có lịch hẹn không
+        $appointment = Appointment::where('id', $doctor->doctorID) // Kiểm tra bác sĩ có lịch hẹn không
+            ->where('user_id', $id) // Kiểm tra bệnh nhân có lịch hẹn không
             ->first();
 
         if (!$appointment) {
@@ -343,4 +343,60 @@ class DoctorsController extends Controller
             'message' => 'Thông tin bệnh nhân đã được lấy thành công!',
         ], 200); // Mã 200 - OK
     }
+    // lấy thông báo cho bác sĩ
+    public function getNotifications($doctorID)
+    {
+        $doctor = Doctor::find($doctorID);
+    
+        if (!$doctor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy bác sĩ.',
+            ], 404);
+        }
+    
+        return response()->json([
+            'success' => true,
+            'notifications' => $doctor->notifications
+        ], 200);
+    }   
+    // thông báo đã đọc 
+    public function markNotificationAsRead($notificationID)
+    {
+        $notification = auth()->user()->notifications()->find($notificationID);
+
+        if (!$notification) {
+            return response()->json(['success' => false, 'message' => 'Thông báo không tồn tại.'], 404);
+        }
+
+        $notification->markAsRead();
+
+        return response()->json(['success' => true, 'message' => 'Thông báo đã được đánh dấu là đã đọc.']);
+    }
+    // thông báo chưa đọc 
+    public function getUnreadNotifications($doctorID)
+    {
+        $doctor = Doctor::findOrFail($doctorID);
+        $notifications = $doctor->unreadNotifications;
+
+        return response()->json([
+            'success' => true,
+            'notifications' => $notifications
+        ]);
+    }
+    // xóa thông báo đã đọc 
+    public function deleteNotification($notificationID)
+    {
+        $notification = auth()->user()->notifications()->find($notificationID);
+
+        if (!$notification) {
+            return response()->json(['success' => false, 'message' => 'Thông báo không tồn tại.'], 404);
+        }
+
+        $notification->delete();
+
+        return response()->json(['success' => true, 'message' => 'Thông báo đã bị xóa.']);
+    }
+
+
 }
