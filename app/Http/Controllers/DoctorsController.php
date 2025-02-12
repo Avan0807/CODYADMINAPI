@@ -343,23 +343,27 @@ class DoctorsController extends Controller
             'message' => 'Thông tin bệnh nhân đã được lấy thành công!',
         ], 200); // Mã 200 - OK
     }
-    // lấy thông báo cho bác sĩ
-    public function getNotifications($doctorID)
+
+    // Lấy thông báo cho bác sĩ đang đăng nhập
+    public function getNotifications(Request $request)
     {
-        $doctor = Doctor::find($doctorID);
-    
+        // Lấy bác sĩ từ thông tin người dùng đã đăng nhập (token)
+        $doctor = $request->user(); // hoặc $request->doctor() nếu bạn đã cấu hình cách khác
+
         if (!$doctor) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không tìm thấy bác sĩ.',
             ], 404);
         }
-    
+
+        // Trả về thông báo của bác sĩ hiện tại
         return response()->json([
             'success' => true,
             'notifications' => $doctor->notifications
         ], 200);
-    }   
+    }
+  
     // thông báo đã đọc 
     public function markNotificationAsRead($notificationID)
     {

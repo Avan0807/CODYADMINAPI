@@ -91,7 +91,7 @@ class AppointmentsController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Không tìm thấy cuộc hẹn nào cho userID này.',
-                ], 404);
+                ]);
             }
 
             return response()->json([

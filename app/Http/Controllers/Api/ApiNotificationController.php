@@ -1,59 +1,106 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Notification;
 
 class ApiNotificationController extends Controller
 {
     /**
-     * Hiển thị danh sách thông báo (API).
+     * Lấy danh sách thông báo của user (cả đã đọc và chưa đọc)
      */
     public function index()
     {
-        $notifications = Auth::user()->notifications()->paginate(10);
-        return response()->json($notifications);
-    }
-
-    /**
-     * Hiển thị và đánh dấu thông báo đã đọc (API).
-     */
-    public function show(Request $request)
-    {
-        $notification = Auth::user()->notifications()->where('id', $request->id)->first();
-
-        if (!$notification) {
-            return response()->json(['error' => 'Thông báo không tìm thấy'], 404);
-        }
-
-        $notification->markAsRead();
+        $notifications = Auth::user()->notifications()->orderBy('created_at', 'desc')->get();
 
         return response()->json([
-            'success' => 'Đánh dấu thông báo là đã đọc',
-            'actionURL' => $notification->data['actionURL']
+            'success' => true,
+            'notifications' => $notifications
         ]);
     }
 
     /**
-     * Xóa thông báo (API).
+     * Lấy danh sách thông báo chưa đọc của user
+     */
+    public function unread()
+    {
+        $notifications = Auth::user()->unreadNotifications()->orderBy('created_at', 'desc')->get();
+
+        return response()->json([
+            'success' => true,
+            'unread_count' => $notifications->count(),
+            'notifications' => $notifications
+        ]);
+    }
+
+    /**
+     * Đánh dấu một thông báo là đã đọc
+     */
+    public function markAsRead($id)
+    {
+        $notification = Auth::user()->notifications()->where('id', $id)->first();
+
+        if ($notification) {
+            $notification->markAsRead();
+            return response()->json([
+                'success' => true,
+                'message' => 'Thông báo đã được đánh dấu là đã đọc.'
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Không tìm thấy thông báo.'
+        ], 404);
+    }
+
+    /**
+     * Đánh dấu tất cả thông báo là đã đọc
+     */
+    public function markAllAsRead()
+    {
+        Auth::user()->unreadNotifications->markAsRead();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tất cả thông báo đã được đánh dấu là đã đọc.'
+        ]);
+    }
+
+    /**
+     * Xóa một thông báo
      */
     public function delete($id)
     {
-        $notification = Notification::find($id);
+        $notification = Auth::user()->notifications()->where('id', $id)->first();
 
-        if (!$notification) {
-            return response()->json(['error' => 'Thông báo không tìm thấy'], 404);
+        if ($notification) {
+            $notification->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Thông báo đã được xóa thành công.'
+            ]);
         }
 
-        $status = $notification->delete();
+        return response()->json([
+            'success' => false,
+            'message' => 'Không tìm thấy thông báo.'
+        ], 404);
+    }
 
-        if ($status) {
-            return response()->json(['success' => 'Thông báo đã được xóa thành công']);
-        } else {
-            return response()->json(['error' => 'Lỗi khi xóa thông báo'], 400);
-        }
+    /**
+     * Xóa tất cả thông báo của user
+     */
+    public function deleteAll()
+    {
+        Auth::user()->notifications()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tất cả thông báo đã được xóa thành công.'
+        ]);
     }
 }

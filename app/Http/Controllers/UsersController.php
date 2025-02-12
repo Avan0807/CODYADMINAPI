@@ -297,4 +297,76 @@ class UsersController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Lấy tất cả thông báo của user
+     */
+    public function getNotifications(Request $request)
+    {
+        $user = $request->user();  // Kiểm tra người dùng từ token
+    
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy người dùng.',
+            ], 404);
+        }
+    
+        $notifications = $user->notifications()->latest()->get();
+        return response()->json([
+            'success' => true,
+            'notifications' => $notifications,
+        ], 200);
+    }
+    
+    /**
+     * Đánh dấu một thông báo là đã đọc
+     */
+    public function markNotificationAsRead(Request $request, $notificationID)
+    {
+        $user = $request->user();
+        $notification = $user->notifications()->find($notificationID);
+
+        if (!$notification) {
+            return response()->json(['success' => false, 'message' => 'Thông báo không tồn tại.'], 404);
+        }
+
+        $notification->markAsRead();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Thông báo đã được đánh dấu là đã đọc.'
+        ]);
+    }
+
+    /**
+     * Lấy danh sách thông báo chưa đọc của user
+     */
+    public function getUnreadNotifications(Request $request)
+    {
+        $user = $request->user();
+        $notifications = $user->unreadNotifications()->latest()->get();
+
+        return response()->json([
+            'success' => true,
+            'notifications' => $notifications
+        ]);
+    }
+
+    /**
+     * Xóa một thông báo
+     */
+    public function deleteNotification(Request $request, $notificationID)
+    {
+        $user = $request->user();
+        $notification = $user->notifications()->find($notificationID);
+
+        if (!$notification) {
+            return response()->json(['success' => false, 'message' => 'Thông báo không tồn tại.'], 404);
+        }
+
+        $notification->delete();
+
+        return response()->json(['success' => true, 'message' => 'Thông báo đã bị xóa.']);
+    }
 }

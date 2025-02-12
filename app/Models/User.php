@@ -63,4 +63,6 @@ class User extends Authenticatable
     {
         return $this->createToken('AuthToken')->plainTextToken;
     }
+
+
 }

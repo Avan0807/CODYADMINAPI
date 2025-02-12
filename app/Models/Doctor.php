@@ -33,4 +33,5 @@ class Doctor extends Authenticatable
     {
         return $this->hasMany(Appointment::class, 'doctor_id');
     }
+    
 }

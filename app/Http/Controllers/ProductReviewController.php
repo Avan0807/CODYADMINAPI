@@ -57,7 +57,7 @@ class ProductReviewController extends Controller
 
         $user=User::where('role','admin')->get();
         $details=[
-            'title'=>'New Product Rating!',
+            'title'=>'Đánh giá sản phẩm mới!',
             'actionURL'=>route('product-detail',$product_info->slug),
             'fas'=>'fa-star'
         ];

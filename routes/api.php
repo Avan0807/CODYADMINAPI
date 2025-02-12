@@ -17,6 +17,8 @@ use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\TreatmentLogController;
 use App\Http\Controllers\Api\ApiNotificationController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Api\ApiProductController;
 
 // AUTHENTICATION ROUTES
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -44,6 +46,18 @@ Route::get('/user/{userID}/get-avatar', [UsersController::class, 'apiGetAvatarBy
 Route::put('/users/{userID}/address', [UsersController::class, 'apiUpdateAddress']);
 Route::get('/users/{userID}/getaddress', [UsersController::class, 'apiGetUserByID']);
 
+// Lấy danh sách thông báo của User
+Route::middleware('auth:sanctum')->get('/user/notifications', [UsersController::class, 'getNotifications']);
+
+// Đánh dấu thông báo đã đọc
+Route::middleware('auth:sanctum')->post('/user/notifications/{notificationID}/mark-as-read', [UsersController::class, 'markNotificationAsRead']);
+
+// Lấy danh sách thông báo chưa đọc
+Route::middleware('auth:sanctum')->get('/user/notifications/unread', [UsersController::class, 'getUnreadNotifications']);
+
+// Xóa một thông báo
+Route::middleware('auth:sanctum')->delete('/user/notifications/{notificationID}', [UsersController::class, 'deleteNotification']);
+
 
 
 // DOCTORS ROUTES
@@ -56,7 +70,7 @@ Route::get('/doctors/{doctorID}', [DoctorsController::class, 'apiGetDoctorsByDoc
 //get user infor by id
 Route::middleware('auth:sanctum')->get('/patient-info/{id}', [DoctorsController::class, 'apiGetPatientInfo']);
 // Lấy thông báo cho doctor 
-Route::middleware('auth:sanctum')->get('/doctor/notifications/{doctorID}', [DoctorsController::class, 'getNotifications']);
+Route::middleware('auth:sanctum')->get('/doctor/notifications', [DoctorsController::class, 'getNotifications']);
 // thông báo đã đọc
 Route::middleware('auth:sanctum')->put('/doctor/notifications/{notificationID}/read', [DoctorsController::class, 'markNotificationAsRead']);
 // thông báo chưa đọc 
@@ -69,6 +83,7 @@ Route::middleware('auth:sanctum')->delete('/doctor/notifications/{notificationID
 // PRODUCT ROUTES
 Route::get('/products', [ProductController::class, 'apiGetAllProducts']);
 Route::get('/products/{id}', [ProductController::class, 'apiGetProductById']);
+Route::post('/productsadd', [ApiProductController::class, 'store']);
 
 // APPOINTMENT ROUTES
 
@@ -166,6 +181,14 @@ Route::middleware('auth:sanctum')->delete('/treatment-logs/{id}', [TreatmentLogC
 
 
 // =================== NOTIFICATION ROUTES ===================
-Route::get('notifications', [ApiNotificationController::class, 'index']);
-Route::get('notifications/{id}', [ApiNotificationController::class, 'show']);
-Route::delete('notifications/{id}', [ApiNotificationController::class, 'delete']);
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/notifications', [ApiNotificationController::class, 'index']); // Lấy tất cả thông báo
+    Route::get('/notifications/unread', [ApiNotificationController::class, 'unread']); // Lấy thông báo chưa đọc
+    Route::post('/notifications/read/{id}', [ApiNotificationController::class, 'markAsRead']); // Đánh dấu thông báo đã đọc
+    Route::post('/notifications/read-all', [ApiNotificationController::class, 'markAllAsRead']); // Đánh dấu tất cả là đã đọc
+    Route::delete('/notifications/delete/{id}', [ApiNotificationController::class, 'delete']); // Xóa thông báo
+    Route::delete('/notifications/delete-all', [ApiNotificationController::class, 'deleteAll']); // Xóa tất cả thông báo
+});
+
