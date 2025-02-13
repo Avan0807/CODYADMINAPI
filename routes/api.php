@@ -147,13 +147,6 @@ Route::middleware('auth:sanctum')->put('/posts/{postId}/comments/{commentId}', [
 
 
 
-
-
-// Default User Route
-// Route::middleware('auth:sanctum')->get('/api/user', function (Request $request) {
-//     return $request->user();
-// });
-
 // ORDER ROUTES
 // Order Routes
 Route::middleware(['auth:sanctum'])->get('/orders', [OrderController::class, 'apiGetUserOrders']);
