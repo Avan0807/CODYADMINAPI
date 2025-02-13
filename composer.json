@@ -21,6 +21,7 @@
         "laravel/ui": "^3.0",
         "mews/captcha": "^3.3",
         "pusher/pusher-php-server": "^5.0",
+        "spatie/image": "^1.10",
         "spatie/laravel-newsletter": "^4.11",
         "srmklive/paypal": "~1.0",
         "symfony/mailer": "^5.4",

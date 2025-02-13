@@ -13,7 +13,10 @@ class Post extends Model
     {
         return $this->hasOne('App\Models\PostCategory', 'id', 'post_cat_id');
     }
-
+    public function cat_info()
+    {
+        return $this->hasOne('App\Models\PostCategory', 'id', 'post_cat_id');
+    }
     public function tags()
     {
         return $this->belongsToMany(PostTag::class, 'post_tags', 'post_id', 'tag_id');

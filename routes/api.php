@@ -22,6 +22,8 @@ use App\Http\Controllers\Api\ApiProductController;
 use App\Http\Controllers\Api\ApiDoctorController;
 use App\Http\Controllers\Api\ApiAuthAdminController;
 use App\Http\Controllers\Api\ApiAuthController;
+use App\Http\Controllers\Api\ApiReviewDoctorController;
+
 
 
 // AUTHENTICATION ROUTES
@@ -48,6 +50,13 @@ Route::prefix('doctor')->group(function () {
         Route::post('/logout', [ApiDoctorController::class, 'doctorLogout']); 
     });
 });
+
+// =================== DOCTOR review ===================
+Route::get('doctor-reviews/{doctor_id}', [ApiReviewDoctorController::class, 'index']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('doctor-reviews', [ApiReviewDoctorController::class, 'store']);
+});
+
 // logout users
 Route::middleware('auth:sanctum')->post('logout', [ApiAuthController::class, 'logout']);
 
