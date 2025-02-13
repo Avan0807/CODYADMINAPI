@@ -65,14 +65,13 @@ Route::put('/users/{userID}/address', [UsersController::class, 'apiUpdateAddress
 Route::get('/users/{userID}/getaddress', [UsersController::class, 'apiGetUserByID']);
 
 // Lấy danh sách thông báo của User
-Route::middleware('auth:sanctum')->get('/user/notifications', [UsersController::class, 'getNotifications']);
+Route::middleware('auth:sanctum')->get('/user/{userID}/notifications', [UsersController::class, 'getNotifications']);
 
 // Đánh dấu thông báo đã đọc
-Route::middleware('auth:sanctum')->post('/user/notifications/{notificationID}/mark-as-read', [UsersController::class, 'markNotificationAsRead']);
+Route::middleware('auth:sanctum')->post('/user/notifications/{notificationID}/read', [UsersController::class, 'markNotificationAsRead']);
 
 // Lấy danh sách thông báo chưa đọc
-Route::middleware('auth:sanctum')->get('/user/notifications/unread', [UsersController::class, 'getUnreadNotifications']);
-
+Route::middleware('auth:sanctum')->get('/user/{userID}/notifications/unread', [UsersController::class, 'getUnreadNotifications']);
 // Xóa một thông báo
 Route::middleware('auth:sanctum')->delete('/user/notifications/{notificationID}', [UsersController::class, 'deleteNotification']);
 
@@ -88,11 +87,11 @@ Route::get('/doctors/{doctorID}', [DoctorsController::class, 'apiGetDoctorsByDoc
 //get user infor by id
 Route::middleware('auth:sanctum')->get('/patient-info/{id}', [DoctorsController::class, 'apiGetPatientInfo']);
 // Lấy thông báo cho doctor 
-Route::middleware('auth:sanctum')->get('/doctor/notifications', [DoctorsController::class, 'getNotifications']);
+Route::middleware('auth:sanctum')->get('/doctor/{doctorID}/notifications', [DoctorsController::class, 'getNotifications']);
 // thông báo đã đọc
-Route::middleware('auth:sanctum')->put('/doctor/notifications/{notificationID}/read', [DoctorsController::class, 'markNotificationAsRead']);
+Route::middleware('auth:sanctum')->post('/doctor/notifications/{notificationID}/read', [DoctorsController::class, 'markNotificationAsRead']);
 // thông báo chưa đọc 
-Route::middleware('auth:sanctum')->get('/doctor/notifications/{doctorID}/unread', [DoctorsController::class, 'getUnreadNotifications']);
+Route::middleware('auth:sanctum')->get('/doctor/{doctorID}/notifications/unread', [DoctorsController::class, 'getUnreadNotifications']);
 // xóa thông báo
 Route::middleware('auth:sanctum')->delete('/doctor/notifications/{notificationID}/delete', [DoctorsController::class, 'deleteNotification']);
 

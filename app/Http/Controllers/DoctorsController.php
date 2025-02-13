@@ -345,24 +345,33 @@ class DoctorsController extends Controller
     }
 
     // Lấy thông báo cho bác sĩ đang đăng nhập
-    public function getNotifications(Request $request)
+    public function getNotifications(Request $request, $doctorID)
     {
         // Lấy bác sĩ từ thông tin người dùng đã đăng nhập (token)
-        $doctor = $request->user(); // hoặc $request->doctor() nếu bạn đã cấu hình cách khác
-
+        $doctor = $request->user(); // Bác sĩ đang đăng nhập
+    
         if (!$doctor) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không tìm thấy bác sĩ.',
             ], 404);
         }
-
-        // Trả về thông báo của bác sĩ hiện tại
+    
+        // Kiểm tra xem bác sĩ đăng nhập có phải là bác sĩ yêu cầu thông báo không
+        if ($doctor->id != $doctorID) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Truy cập trái phép vào thông báo của người dùng.',
+            ], 403); // Trả về lỗi 403 nếu bác sĩ không phải người yêu cầu
+        }
+    
+        // Lấy thông báo của bác sĩ
         return response()->json([
             'success' => true,
-            'notifications' => $doctor->notifications
+            'notifications' => $doctor->notifications,
         ], 200);
     }
+    
   
     // thông báo đã đọc 
     public function markNotificationAsRead($notificationID)
@@ -378,16 +387,29 @@ class DoctorsController extends Controller
         return response()->json(['success' => true, 'message' => 'Thông báo đã được đánh dấu là đã đọc.']);
     }
     // thông báo chưa đọc 
-    public function getUnreadNotifications($doctorID)
+    public function getUnreadNotifications(Request $request, $doctorID)
     {
-        $doctor = Doctor::findOrFail($doctorID);
-        $notifications = $doctor->unreadNotifications;
-
+        // Lấy thông tin bác sĩ từ thông tin người dùng đã đăng nhập (token)
+        $doctor = $request->user();  // Lấy bác sĩ hiện tại từ token
+    
+        // Kiểm tra xem bác sĩ có quyền truy cập thông báo của chính mình không
+        if ($doctor->id != $doctorID) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Truy cập trái phép vào thông báo của bác sĩ.',
+            ], 403); // Nếu không phải bác sĩ hiện tại, trả về lỗi 403
+        }
+    
+        // Lấy các thông báo chưa đọc của bác sĩ
+        $unreadNotifications = $doctor->unreadNotifications;
+    
+        // Trả về thông báo chưa đọc của bác sĩ
         return response()->json([
             'success' => true,
-            'notifications' => $notifications
-        ]);
+            'notifications' => $unreadNotifications,
+        ], 200);
     }
+    
     // xóa thông báo đã đọc 
     public function deleteNotification($notificationID)
     {

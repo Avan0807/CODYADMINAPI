@@ -3,7 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '81802bf5d164af2069eeb3c425cdcf74d9a04d69',
+        'reference' => '8c9accc94bbc464878ddd30a5be9633010a29e3b',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -478,7 +478,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '81802bf5d164af2069eeb3c425cdcf74d9a04d69',
+            'reference' => '8c9accc94bbc464878ddd30a5be9633010a29e3b',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -518,7 +518,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../laravel/tinker',
             'aliases' => array(),
-            'dev_requirement' => false,
+            'dev_requirement' => true,
         ),
         'laravel/ui' => array(
             'pretty_version' => 'v3.4.6',
@@ -659,7 +659,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../nikic/php-parser',
             'aliases' => array(),
-            'dev_requirement' => false,
+            'dev_requirement' => true,
         ),
         'nunomaduro/collision' => array(
             'pretty_version' => 'v5.11.0',
@@ -942,7 +942,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../psy/psysh',
             'aliases' => array(),
-            'dev_requirement' => false,
+            'dev_requirement' => true,
         ),
         'pusher/pusher-php-server' => array(
             'pretty_version' => 'dev-master',

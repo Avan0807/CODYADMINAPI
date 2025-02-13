@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Contracts\View\View as ViewContract;
+use Illuminate\Support\Facades\Log;
+
 
 class UsersController extends Controller
 {
@@ -301,27 +303,37 @@ class UsersController extends Controller
     /**
      * Lấy tất cả thông báo của user
      */
-    public function getNotifications(Request $request)
+    public function getNotifications(Request $request, $userID)
     {
-        $user = auth()->user(); // Lấy user từ token
+        // Kiểm tra xem người dùng có quyền truy cập thông báo của userID này hay không
+        $user = $request->user();  // Người dùng hiện tại
     
-        \Log::info('Token từ request:', ['token' => $request->bearerToken()]);
+        // Kiểm tra xem userID trong URL có phải là người dùng hiện tại không (hoặc có quyền xem thông báo của user khác)
+        if ($user->id != $userID) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Truy cập trái phép vào thông báo của người dùng.',
+            ], 403);
+        }
     
-        if (!$user) {
+        // Lấy thông tin user từ userID
+        $targetUser = User::find($userID);
+    
+        if (!$targetUser) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không tìm thấy người dùng.',
             ], 404);
         }
     
-        $notifications = $user->notifications()->latest()->get();
-    
+        // Trả về thông báo và thông tin user (bao gồm ID)
         return response()->json([
             'success' => true,
-            'notifications' => $notifications,
+            'user_id' => $targetUser->id,  // Trả về ID của user
+            'notifications' => $targetUser->notifications,
         ], 200);
     }
-     
+    
     
     /**
      * Đánh dấu một thông báo là đã đọc
@@ -346,16 +358,29 @@ class UsersController extends Controller
     /**
      * Lấy danh sách thông báo chưa đọc của user
      */
-    public function getUnreadNotifications(Request $request)
+    public function getUnreadNotifications(Request $request, $userID)
     {
+        // Lấy thông tin người dùng đã đăng nhập (user)
         $user = $request->user();
-        $notifications = $user->unreadNotifications()->latest()->get();
-
+    
+        // Kiểm tra xem người dùng có quyền truy cập thông báo của chính mình không
+        if ($user->id != $userID) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Truy cập trái phép vào thông báo của người dùng.',
+            ], 403); // Nếu không phải user hiện tại, trả về lỗi 403
+        }
+    
+        // Lấy các thông báo chưa đọc của user
+        $unreadNotifications = $user->unreadNotifications;
+    
+        // Trả về thông báo chưa đọc của user
         return response()->json([
             'success' => true,
-            'notifications' => $notifications
-        ]);
+            'notifications' => $unreadNotifications,
+        ], 200);
     }
+    
 
     /**
      * Xóa một thông báo
