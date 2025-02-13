@@ -39,4 +39,72 @@ class ApiAuthAdminController extends Controller
         $request->user()->tokens()->delete();
         return response()->json(['message' => 'Đã đăng xuất'], 200);
     }
+
+    public function approvePayout($id) {
+        // Lấy thông tin yêu cầu rút tiền
+        $payout = \DB::table('doctor_payouts')->where('id', $id)->first();
+
+        if (!$payout) {
+            return response()->json(['error' => 'Không tìm thấy yêu cầu rút tiền.'], 404);
+        }
+
+        if ($payout->status !== 'pending') {
+            return response()->json(['error' => 'Yêu cầu rút tiền đã được xử lý trước đó.'], 400);
+        }
+
+        // Lấy thông tin bác sĩ
+        $doctor = \DB::table('doctors')->where('id', $payout->doctor_id)->first();
+
+        if (!$doctor) {
+            return response()->json(['error' => 'Không tìm thấy thông tin bác sĩ.'], 404);
+        }
+
+        // Kiểm tra số tiền rút có hợp lệ không
+        if ($payout->amount <= 0 || $payout->amount > $doctor->total_commission) {
+            return response()->json(['error' => 'Số tiền rút không đủ.'], 400);
+        }
+
+        // Cập nhật số dư hoa hồng của bác sĩ
+        \DB::table('doctors')->where('id', $payout->doctor_id)->update([
+            'total_commission' => $doctor->total_commission - $payout->amount
+        ]);
+
+        // Cập nhật trạng thái yêu cầu rút tiền thành "approved"
+        \DB::table('doctor_payouts')->where('id', $id)->update([
+            'status' => 'approved',
+            'processed_at' => now()
+        ]);
+
+        return response()->json([
+            'message' => 'Yêu cầu rút tiền đã được duyệt.',
+            'amount' => $payout->amount
+        ], 200);
+    }
+
+
+
+
+    public function rejectPayout($id) {
+        $payout = \DB::table('doctor_payouts')->where('id', $id)->first();
+
+        if (!$payout) {
+            return response()->json(['error' => 'Không tìm thấy yêu cầu rút tiền.'], 404);
+        }
+
+        if ($payout->status !== 'pending') {
+            return response()->json(['error' => 'Yêu cầu rút tiền đã được xử lý trước đó.'], 400);
+        }
+
+        // Cập nhật trạng thái thành 'rejected'
+        \DB::table('doctor_payouts')->where('id', $id)->update([
+            'status' => 'rejected',
+            'processed_at' => now() // Lưu thời gian từ chối
+        ]);
+
+        return response()->json([
+            'message' => 'Yêu cầu rút tiền đã bị từ chối.',
+            'payout_id' => $id
+        ], 200);
+    }
+
 }

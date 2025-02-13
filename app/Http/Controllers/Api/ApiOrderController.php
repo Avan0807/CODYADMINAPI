@@ -8,9 +8,12 @@ use App\Models\Order;
 use App\Models\Shipping;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
 use Helper;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Product;
+use App\Models\Doctor;
 
 class ApiOrderController extends Controller
 {
@@ -201,4 +204,92 @@ class ApiOrderController extends Controller
 
         return response()->json($data);
     }
+
+    public function storeDoctor(Request $request) {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Bạn cần đăng nhập để đặt hàng.'], 401);
+        }
+
+        $order = new Order();
+        $order->user_id = Auth::id();
+        $order->product_id = $request->product_id;
+        $order->quantity = $request->quantity;
+
+        // ✅ Tính `sub_total`
+        $productPrice = 999000; // 🔹 Ví dụ giá sản phẩm, bạn nên lấy từ DB
+        $order->sub_total = $productPrice * $order->quantity;
+
+        // ✅ Tính tổng tiền
+        $order->total_amount = $order->sub_total;
+
+        // ✅ Tạo mã đơn hàng ngẫu nhiên
+        $order->order_number = 'ORD-' . strtoupper(Str::random(10));
+
+        // ✅ Nếu có bác sĩ, chỉ lưu commission vào đơn hàng
+        if ($request->has('doctor_id') && !empty($request->doctor_id)) {
+            $order->doctor_id = $request->doctor_id;
+            $order->commission = $order->sub_total * 0.10; // 10%
+        } else {
+            $order->commission = 0;
+        }
+
+        // ✅ Đơn hàng mặc định có trạng thái "new"
+        $order->status = "new";
+        $order->payment_status = "unpaid";
+
+        // ✅ Thông tin khách hàng
+        $order->first_name = $request->first_name ?? 'Unknown';
+        $order->last_name = $request->last_name ?? 'Unknown';
+        $order->email = $request->email ?? 'unknown@gmail.com';
+        $order->phone = $request->phone ?? '0000000000';
+        $order->country = $request->country ?? 'Vietnam';
+        $order->address1 = $request->address1 ?? 'Default Address';
+        $order->address2 = $request->address2 ?? null;
+
+        // 🔥 Lưu vào database
+        $order->save();
+
+        return response()->json([
+            'message' => 'Đơn hàng được tạo thành công!',
+            'order' => $order
+        ], 201);
+    }
+
+
+    public function updateOrderStatus(Request $request, $order_id) {
+        $order = Order::find($order_id);
+
+        if (!$order) {
+            return response()->json(['error' => 'Không tìm thấy đơn hàng!'], 404);
+        }
+
+        // ✅ Chỉ cho phép cập nhật trạng thái hợp lệ
+        $validStatuses = ['new', 'process', 'delivered', 'cancel'];
+        if (!in_array($request->status, $validStatuses)) {
+            return response()->json(['error' => 'Trạng thái không hợp lệ.'], 400);
+        }
+
+        // ✅ Nếu đơn hàng chuyển sang "delivered", cộng commission vào tổng của bác sĩ
+        if ($request->status == "delivered" && $order->doctor_id) {
+            $doctor = Doctor::find($order->doctor_id);
+            if ($doctor) {
+                // 🔥 Kiểm tra để tránh cộng dồn nhiều lần
+                if ($order->status !== "delivered") {
+                    $doctor->total_commission += $order->commission;
+                    $doctor->save();
+                }
+            }
+        }
+
+        // ✅ Cập nhật trạng thái đơn hàng
+        $order->status = $request->status;
+        $order->save();
+
+        return response()->json([
+            'message' => 'Trạng thái đơn hàng đã được cập nhật!',
+            'order' => $order
+        ], 200);
+    }
+
+
 }

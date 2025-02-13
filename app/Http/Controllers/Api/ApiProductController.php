@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 
+
 class ApiProductController extends Controller
 {
     /**
@@ -202,4 +203,27 @@ class ApiProductController extends Controller
             'message' => 'Sản phẩm đã được xóa thành công!'
         ], 200);
     }
+
+
+    public function trackAffiliate(Request $request, $product_id) {
+        // Gọi đúng quan hệ `cat_info` và `sub_cat_info`
+        $product = Product::with('cat_info', 'sub_cat_info')->find($product_id);
+
+        if (!$product) {
+            return response()->json(['error' => 'Sản phẩm không tồn tại'], 404);
+        }
+
+        // Ghi nhận affiliate nếu có
+        if ($request->has('ref')) {
+            session(['doctor_ref' => $request->query('ref')]);
+        }
+
+        return response()->json([
+            'message' => 'Thông tin sản phẩm và affiliate reference được lưu',
+            'product' => $product,
+            'doctor_id' => session('doctor_ref') ?? null
+        ], 200);
+    }
+
+
 }

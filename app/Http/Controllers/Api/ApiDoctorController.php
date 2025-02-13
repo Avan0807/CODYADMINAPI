@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Order;
 
 class ApiDoctorController extends Controller
 {
@@ -217,4 +218,54 @@ class ApiDoctorController extends Controller
             ], 500);
         }
     }
+
+    public function orders(Request $request, $doctor_id)
+    {
+        // Kiểm tra xem bác sĩ đang đăng nhập có ID trùng với ID được truyền vào không
+        $doctor = auth()->user();
+
+        if (!$doctor || $doctor->id != $doctor_id) {
+            return response()->json([
+                'error' => 'Bạn không có quyền truy cập đơn hàng này!'
+            ], 403);
+        }
+
+        // Lấy danh sách đơn hàng của bác sĩ
+        $orders = Order::where('doctor_id', $doctor_id)->get();
+
+        return response()->json([
+            'message' => 'Danh sách đơn hàng của bác sĩ',
+            'orders' => $orders
+        ]);
+    }
+
+
+
+
+    public function requestPayout(Request $request) {
+        $doctorID = Auth::id();
+        $doctor = \DB::table('doctors')->where('id', $doctorID)->first();
+
+        if (!$doctor) {
+            return response()->json(['error' => 'Không tìm thấy bác sĩ.'], 404);
+        }
+
+        if ($doctor->total_commission < 500000) {
+            return response()->json(['error' => 'Bạn cần ít nhất 500,000đ để rút tiền.'], 400);
+        }
+
+        // Tạo yêu cầu rút tiền với số tiền bằng total_commission hiện có
+        \DB::table('doctor_payouts')->insert([
+            'doctor_id' => $doctorID,
+            'amount' => $doctor->total_commission,
+            'status' => 'pending',
+            'created_at' => now()
+        ]);
+
+        return response()->json([
+            'message' => 'Yêu cầu rút tiền của bạn đã được gửi.',
+            'amount' => $doctor->total_commission
+        ], 200);
+    }
+
 }

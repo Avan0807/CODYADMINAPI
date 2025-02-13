@@ -23,7 +23,22 @@ use App\Http\Controllers\Api\ApiDoctorController;
 use App\Http\Controllers\Api\ApiAuthAdminController;
 use App\Http\Controllers\Api\ApiAuthController;
 use App\Http\Controllers\Api\ApiReviewDoctorController;
+use App\Http\Controllers\Api\ApiAffiliateController;
+use App\Http\Controllers\Api\ApiOrderController;
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/admin/update-order-status/{order_id}', [ApiOrderController::class, 'updateOrderStatus']);
+});
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/doctor/generate-link/{product_id}', [ApiAffiliateController::class, 'generateLink']);
+    Route::get('/doctor/{doctor_id}/orders', [ApiDoctorController::class, 'orders']);
+    Route::post('/doctor/request-payout', [ApiDoctorController::class, 'requestPayout']);
+    Route::post('/order/storeDoctor', [ApiOrderController::class, 'storeDoctor']);
+});
+
+Route::get('/product-detail/{product_id}', [ApiProductController::class, 'trackAffiliate']);
 
 
 // AUTHENTICATION ROUTES
@@ -32,10 +47,19 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::post('/register', [RegisterController::class, 'apiRegister']);
 
+
+// =================== ADMIN cho rut tien  ===================
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::post('/admin/approve-payout/{id}', [ApiAuthAdminController::class, 'approvePayout']);
+    Route::post('/admin/reject-payout/{id}', [ApiAuthAdminController::class, 'rejectPayout']);
+});
+
+
 // =================== ADMIN DOCTOR MANAGEMENT ===================
 Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
-    Route::post('/create-doctor', [ApiDoctorController::class, 'createDoctor']); 
+    Route::post('/create-doctor', [ApiDoctorController::class, 'createDoctor']);
     Route::delete('/delete-doctor/{id}', [ApiDoctorController::class, 'deleteDoctor']);
+
 });
 
 // Login
@@ -47,7 +71,7 @@ Route::post('/login/doctor', [LoginController::class, 'apiDoctorLogin']);
 Route::prefix('doctor')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [ApiDoctorController::class, 'doctorLogout']); 
+        Route::post('/logout', [ApiDoctorController::class, 'doctorLogout']);
     });
 });
 
@@ -95,11 +119,11 @@ Route::get('/alldoctors', [DoctorsController::class, 'apiGetAllDoctors']);
 Route::get('/doctors/{doctorID}', [DoctorsController::class, 'apiGetDoctorsByDoctorId']);
 //get user infor by id
 Route::middleware('auth:sanctum')->get('/patient-info/{id}', [DoctorsController::class, 'apiGetPatientInfo']);
-// Lấy thông báo cho doctor 
+// Lấy thông báo cho doctor
 Route::middleware('auth:sanctum')->get('/doctor/{doctorID}/notifications', [DoctorsController::class, 'getNotifications']);
 // thông báo đã đọc
 Route::middleware('auth:sanctum')->post('/doctor/notifications/{notificationID}/read', [DoctorsController::class, 'markNotificationAsRead']);
-// thông báo chưa đọc 
+// thông báo chưa đọc
 Route::middleware('auth:sanctum')->get('/doctor/{doctorID}/notifications/unread', [DoctorsController::class, 'getUnreadNotifications']);
 // xóa thông báo
 Route::middleware('auth:sanctum')->delete('/doctor/notifications/{notificationID}/delete', [DoctorsController::class, 'deleteNotification']);
@@ -171,7 +195,7 @@ Route::middleware('auth:sanctum')->put('/posts/{postId}/comments/{commentId}', [
 Route::middleware(['auth:sanctum'])->get('/orders', [OrderController::class, 'apiGetUserOrders']);
 Route::middleware(['auth:sanctum'])->post('/orders/create', [OrderController::class, 'apiCreateOrder']);
 
-// Order status 
+// Order status
 Route::middleware(['auth:sanctum'])->get('/orders/{order_id}/status', [OrderController::class, 'apiGetOrderStatus']);
 Route::middleware(['auth:sanctum'])->get('/orders/status', [OrderController::class, 'apiGetUserOrdersStatus']);
 
