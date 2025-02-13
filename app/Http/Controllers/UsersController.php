@@ -303,7 +303,9 @@ class UsersController extends Controller
      */
     public function getNotifications(Request $request)
     {
-        $user = $request->user();  // Kiểm tra người dùng từ token
+        $user = auth()->user(); // Lấy user từ token
+    
+        \Log::info('Token từ request:', ['token' => $request->bearerToken()]);
     
         if (!$user) {
             return response()->json([
@@ -313,11 +315,13 @@ class UsersController extends Controller
         }
     
         $notifications = $user->notifications()->latest()->get();
+    
         return response()->json([
             'success' => true,
             'notifications' => $notifications,
         ], 200);
     }
+     
     
     /**
      * Đánh dấu một thông báo là đã đọc

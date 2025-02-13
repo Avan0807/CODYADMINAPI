@@ -20,6 +20,9 @@ use App\Http\Controllers\Api\ApiNotificationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Api\ApiProductController;
 use App\Http\Controllers\Api\ApiDoctorController;
+use App\Http\Controllers\Api\ApiAuthAdminController;
+use App\Http\Controllers\Api\ApiAuthController;
+
 
 // AUTHENTICATION ROUTES
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -38,10 +41,18 @@ Route::post('/login', [LoginController::class, 'apiLogin']);
 // Doctor login
 Route::post('/login/doctor', [LoginController::class, 'apiDoctorLogin']);
 
-// Logout
-Route::post('/logout', [LoginController::class, 'apiLogout']);
-// Route::post('/login', [LoginController::class, 'apiLogin']);
+// =================== DOCTOR AUTHENTICATION ===================
+Route::prefix('doctor')->group(function () {
 
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [ApiDoctorController::class, 'doctorLogout']); 
+    });
+});
+// logout users
+Route::middleware('auth:sanctum')->post('logout', [ApiAuthController::class, 'logout']);
+
+// admin Logout
+Route::post('admin/logout', [ApiAuthAdminController::class, 'logout'])->middleware('auth:sanctum');
 
 // USERS ROUTES
 Route::middleware('auth:sanctum')->get('/user/{id}', [UsersController::class, 'apiGetUserById']);

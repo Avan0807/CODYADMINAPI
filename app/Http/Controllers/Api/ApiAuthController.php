@@ -170,4 +170,18 @@ class ApiAuthController extends Controller
             'message' => 'Người dùng đã bị xóa thành công!'
         ], 200);
     }
+    /**
+     * Đăng xuất người dùng.
+     */
+    public function logout(Request $request)
+    {
+        // Xóa tất cả token của người dùng hiện tại
+        $request->user()->tokens()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đăng xuất thành công!'
+        ], 200);
+    }
+
 }
