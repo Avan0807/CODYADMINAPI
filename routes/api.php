@@ -19,12 +19,19 @@ use App\Http\Controllers\TreatmentLogController;
 use App\Http\Controllers\Api\ApiNotificationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Api\ApiProductController;
+use App\Http\Controllers\Api\ApiDoctorController;
 
 // AUTHENTICATION ROUTES
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 Route::post('/register', [RegisterController::class, 'apiRegister']);
+
+// =================== ADMIN DOCTOR MANAGEMENT ===================
+Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
+    Route::post('/create-doctor', [ApiDoctorController::class, 'createDoctor']); 
+    Route::delete('/delete-doctor/{id}', [ApiDoctorController::class, 'deleteDoctor']);
+});
 
 // Login
 Route::post('/login', [LoginController::class, 'apiLogin']);

@@ -52,7 +52,7 @@ class ApiDoctorController extends Controller
             'rating' => 'nullable|numeric|min:0|max:5',
             'consultation_fee' => 'nullable|numeric|min:0',
             'bio' => 'nullable|string',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string|min:6',
             'points' => 'nullable|integer|min:0'
         ]);
 
