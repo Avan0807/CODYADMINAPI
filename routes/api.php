@@ -157,9 +157,12 @@ Route::put('/appointments/{appointmentID}/complete', [AppointmentsController::cl
 Route::put('/appointments/{userID}/{appointmentID}/cancel', [AppointmentsController::class, 'apiCancelAppointment']);
 
 //Get appointmet buy DoctorID
-Route::get('/appointments/doctor/{doctorID}/all', [AppointmentsController::class, 'apiGetAllAppointmentsByDoctor']);
-Route::get('/appointments/doctor/{doctorID}/recent', [AppointmentsController::class, 'apiGetRecentAppointments']);
-Route::delete('/appointments/{appointmentID}/reject', [AppointmentsController::class, 'apiDeleteAppointment']);
+Route::middleware('auth:sanctum')->get('/appointments/doctor/{doctorID}/all', [AppointmentsController::class, 'apiGetAllAppointmentsByDoctor']);
+Route::middleware('auth:sanctum')->get('/appointments/doctor/recent', [AppointmentsController::class, 'apiGetRecentAppointments']);
+Route::middleware('auth:sanctum')->delete('/appointments/doctor/{appointmentID}/reject', [AppointmentsController::class, 'apiDeleteAppointment']);
+
+// patients
+Route::middleware('auth:sanctum')->get('/patients/doctor/all', [AppointmentsController::class, 'getAllPatientsForDoctor']);
 
 
 

@@ -210,14 +210,20 @@ class ApiOrderController extends Controller
             return response()->json(['error' => 'Bạn cần đăng nhập để đặt hàng.'], 401);
         }
 
+        // ✅ Kiểm tra sản phẩm có tồn tại không
+        $product = Product::find($request->product_id);
+        if (!$product) {
+            return response()->json(['error' => 'Sản phẩm không tồn tại.'], 404);
+        }
+
+        // ✅ Tạo đơn hàng
         $order = new Order();
         $order->user_id = Auth::id();
-        $order->product_id = $request->product_id;
+        $order->product_id = $product->id;
         $order->quantity = $request->quantity;
 
-        // ✅ Tính `sub_total`
-        $productPrice = 999000; // 🔹 Ví dụ giá sản phẩm, bạn nên lấy từ DB
-        $order->sub_total = $productPrice * $order->quantity;
+        // ✅ Lấy giá sản phẩm từ CSDL
+        $order->sub_total = $product->price * $order->quantity;
 
         // ✅ Tính tổng tiền
         $order->total_amount = $order->sub_total;
@@ -254,6 +260,7 @@ class ApiOrderController extends Controller
             'order' => $order
         ], 201);
     }
+
 
 
     public function updateOrderStatus(Request $request, $order_id) {

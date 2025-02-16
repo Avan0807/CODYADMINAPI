@@ -240,8 +240,6 @@ class ApiDoctorController extends Controller
     }
 
 
-
-
     public function requestPayout(Request $request) {
         $doctorID = Auth::id();
         $doctor = \DB::table('doctors')->where('id', $doctorID)->first();
