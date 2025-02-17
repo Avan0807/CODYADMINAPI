@@ -10,6 +10,15 @@ use Illuminate\Http\Request;
 
 class ApiCartController extends Controller
 {
+    public function index()
+    {
+        $cart = Cart::where('user_id', auth()->id())->get();
+
+        return response()->json([
+            'success' => true,
+            'cart' => $cart
+        ], 200);
+    }
     /**
      * Thêm sản phẩm vào giỏ hàng (API).
      */
@@ -18,6 +27,7 @@ class ApiCartController extends Controller
         $this->validate($request, [
             'slug' => 'required|string',
         ]);
+
 
         $product = Product::where('slug', $request->slug)->first();
         if (!$product) {

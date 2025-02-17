@@ -25,6 +25,18 @@ use App\Http\Controllers\Api\ApiAuthController;
 use App\Http\Controllers\Api\ApiReviewDoctorController;
 use App\Http\Controllers\Api\ApiAffiliateController;
 use App\Http\Controllers\Api\ApiOrderController;
+use App\Http\Controllers\Api\ApiCartController;
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/order/store', [ApiOrderController::class, 'store']);
+    Route::post('/cart/add', [ApiCartController::class, 'addToCart']);
+    Route::post('/cart/single', [ApiCartController::class, 'singleAddToCart']);
+    Route::get('/cart', [ApiCartController::class, 'index']);
+    Route::put('/cart/update', [ApiCartController::class, 'cartUpdate']);
+    Route::delete('/cart/remove', [ApiCartController::class, 'cartDelete']);
+});
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/update-order-status/{order_id}', [ApiOrderController::class, 'updateOrderStatus']);
@@ -37,7 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/doctor/request-payout', [ApiDoctorController::class, 'requestPayout']);
     Route::post('/order/storeDoctor', [ApiOrderController::class, 'storeDoctor']);
 });
-
+Route::get('/affiliate/click/{affiliate_code}', [ApiAffiliateController::class, 'trackClick']);
 Route::get('/product-detail/{product_id}', [ApiProductController::class, 'trackAffiliate']);
 
 
@@ -169,7 +181,6 @@ Route::middleware('auth:sanctum')->get('/patients/doctor/all', [AppointmentsCont
 // CART ROUTES
 Route::get('/cart/{userID}', [CartController::class, 'apiGetUserCart']);
 // Add more product to cart
-Route::middleware('auth:sanctum')->post('/cart/add', [CartController::class, 'apiAddProductToCart']);
 //Remove product by useruser
 Route::delete('/cart/{userId}/{productId}', [CartController::class, 'apiRemoveFromCartByUser']);
 // Update product quantity

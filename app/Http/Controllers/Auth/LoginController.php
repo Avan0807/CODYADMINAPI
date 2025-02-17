@@ -141,7 +141,7 @@ class LoginController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Validation failed',
+                    'message' => 'Dữ liệu nhập vào không hợp lệ.',
                     'errors' => $validator->errors(),
                 ], 422);
             }
@@ -156,28 +156,30 @@ class LoginController extends Controller
                 ], 404);
             }
 
-            // Step 3: Xác minh mật khẩu
-            // if (!Hash::check($request->password, $doctor->password)) {
-            //     return response()->json([
-            //         'success' => false,
-            //         'message' => 'Mật khẩu không đúng.',
-            //     ], 401);
-            // }
-            if ($request->password !== $doctor->password) {
+            // Step 3: Kiểm tra mật khẩu đã băm
+            if (!Hash::check($request->password, $doctor->password)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Mật khẩu không đúng.',
                 ], 401);
             }
 
-            // Step 4: Tạo token nếu cần (Laravel Sanctum)
+            // Step 4: Tạo token (Laravel Sanctum)
             $token = $doctor->createToken('authToken')->plainTextToken;
 
             // Step 5: Trả về phản hồi
             return response()->json([
                 'success' => true,
                 'message' => 'Đăng nhập thành công.',
-                'doctor' => $doctor,
+                'doctor' => [
+                    'id' => $doctor->id,
+                    'name' => $doctor->name,
+                    'phone' => $doctor->phone,
+                    'email' => $doctor->email,
+                    'workplace' => $doctor->workplace,
+                    'status' => $doctor->status,
+                    'rating' => $doctor->rating,
+                ],
                 'token' => $token,
                 'token_type' => 'Bearer',
             ], 200);

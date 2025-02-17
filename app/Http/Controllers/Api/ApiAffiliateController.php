@@ -39,4 +39,36 @@ class ApiAffiliateController extends Controller
             'data' => $affiliate
         ], 201);
     }
+
+    public function trackClick(Request $request, $affiliate_code) {
+        // Tìm thông tin affiliate link
+        $affiliate = \DB::table('affiliate_links')->where('affiliate_code', $affiliate_code)->first();
+
+        if (!$affiliate) {
+            return response()->json(['error' => 'Affiliate link không tồn tại.'], 404);
+        }
+
+        // Lưu thông tin lượt click vào bảng affiliate_clicks
+        \DB::table('affiliate_clicks')->insert([
+            'doctor_id' => $affiliate->doctor_id,
+            'product_id' => $affiliate->product_id,
+            'affiliate_code' => $affiliate_code,
+            'ip_address' => $request->ip(),  // Lấy địa chỉ IP của user
+            'user_agent' => $request->header('User-Agent'), // Lấy thông tin trình duyệt
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // Cộng điểm cho bác sĩ (ví dụ: mỗi click được +1 điểm)
+        \DB::table('doctors')->where('id', $affiliate->doctor_id)->increment('points', 1);
+
+        return response()->json([
+            'message' => 'Click được ghi nhận thành công!',
+            'doctor_id' => $affiliate->doctor_id,
+            'product_id' => $affiliate->product_id,
+            'points_added' => 1
+        ], 200);
+    }
+
+
 }

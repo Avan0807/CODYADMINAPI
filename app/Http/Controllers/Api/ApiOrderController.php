@@ -31,43 +31,94 @@ class ApiOrderController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate($request, [
-            'first_name' => 'string|required',
-            'last_name'  => 'string|required',
-            'address1'   => 'string|required',
-            'address2'   => 'string|nullable',
-            'coupon'     => 'nullable',
-            'phone'      => 'required',
-            'post_code'  => 'string|nullable',
-            'email'      => 'string|required',
-        ]);
-
-        if (empty(Cart::where('user_id', auth()->user()->id)->where('order_id', null)->first())) {
-            return response()->json(['error' => 'Giỏ hàng đang trống!'], 400);
+        // ✅ Kiểm tra nếu user chưa đăng nhập
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Bạn cần đăng nhập để đặt hàng.'], 401);
         }
 
-        // Create order
-        $order_data = $request->all();
-        $order_data['order_number'] = 'ORD-' . strtoupper(Str::random(10));
-        $order_data['user_id'] = $request->user()->id;
-        $order_data['shipping_id'] = $request->shipping;
-        $shipping = Shipping::find($order_data['shipping_id']);
-        $order_data['sub_total'] = Helper::totalCartPrice();
-        $order_data['quantity'] = Helper::cartCount();
-        $order_data['coupon'] = session('coupon')['value'] ?? 0;
-        $order_data['total_amount'] = $order_data['sub_total'] + ($shipping ? $shipping->price : 0) - ($order_data['coupon'] ?? 0);
-        $order_data['payment_method'] = request('payment_method');
-        $order_data['payment_status'] = request('payment_method') === 'paypal' ? 'paid' : 'Unpaid';
+        // ✅ Kiểm tra giỏ hàng có sản phẩm không
+        $cartItems = Cart::where('user_id', Auth::id())->whereNull('order_id')->get();
+        if ($cartItems->isEmpty()) {
+            return response()->json(['error' => 'Giỏ hàng của bạn đang trống!'], 400);
+        }
 
+        // ✅ Lấy sản phẩm đầu tiên trong giỏ hàng
+        $firstProduct = $cartItems->first();
+
+        // ✅ Kiểm tra dữ liệu đầu vào
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name'  => 'required|string|max:255',
+            'address1'   => 'required|string|max:255',
+            'address2'   => 'nullable|string|max:255',
+            'phone'      => 'required|string|max:15',
+            'email'      => 'required|email|max:255',
+            'post_code'  => 'nullable|string|max:20',
+            'shipping_id' => 'nullable|exists:shippings,id',
+            'coupon'     => 'nullable|string',
+            'payment_method' => 'required|string|in:cod,paypal,bank_transfer',
+            'country'    => 'nullable|string|max:255' // ✅ Bổ sung country vào validate
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => 'Dữ liệu không hợp lệ.',
+                'details' => $validator->errors()
+            ], 400);
+        }
+
+        // ✅ Tính tổng giá trị đơn hàng
+        $subTotal = $cartItems->sum(function ($item) {
+            return $item->price * $item->quantity;
+        });
+
+        // ✅ Lấy phí vận chuyển (nếu có)
+        $shipping = Shipping::find($request->shipping_id);
+        $shippingCost = $shipping ? $shipping->price : 0;
+
+        // ✅ Áp dụng mã giảm giá (nếu có)
+        $couponValue = session('coupon')['value'] ?? 0;
+
+        // ✅ Tính tổng tiền đơn hàng
+        $totalAmount = $subTotal + $shippingCost - $couponValue;
+
+        // ✅ Tạo đơn hàng mới
         $order = new Order();
-        $order->fill($order_data);
+        $order->user_id = Auth::id();
+        $order->product_id = $firstProduct->product_id;
+        $order->order_number = 'ORD-' . strtoupper(Str::random(10));
+        $order->sub_total = $subTotal;
+        $order->total_amount = $totalAmount;
+        $order->quantity = $cartItems->sum('quantity');
+        $order->shipping_id = $request->shipping ?? null; // Thêm fallback nếu không có giá trị
+        $order->coupon = $couponValue;
+        $order->payment_method = $request->payment_method;
+        $order->payment_status = $request->payment_method === 'paypal' ? 'paid' : 'unpaid';
+        $order->status = "new";
+
+        // ✅ Thông tin khách hàng
+        $order->first_name = $request->first_name;
+        $order->last_name = $request->last_name;
+        $order->email = $request->email;
+        $order->phone = $request->phone;
+        $order->post_code = $request->post_code;
+        $order->address1 = $request->address1;
+        $order->address2 = $request->address2;
+        $order->country = $request->country ?? 'Vietnam'; // ✅ Thêm country mặc định nếu không có
+
+        // 🔥 Lưu đơn hàng vào database
         $order->save();
 
-        // Update cart and send notification
-        Cart::where('user_id', auth()->user()->id)->where('order_id', null)->update(['order_id' => $order->id]);
+        // ✅ Gán order_id vào giỏ hàng
+        Cart::where('user_id', Auth::id())->whereNull('order_id')->update(['order_id' => $order->id]);
 
-        return response()->json(['success' => 'Đơn hàng của bạn đã được tạo. Cảm ơn bạn đã mua sắm!'], 201);
+        return response()->json([
+            'message' => 'Đơn hàng của bạn đã được tạo thành công!',
+            'order' => $order
+        ], 201);
     }
+
+
 
     /**
      * Hiển thị chi tiết đơn hàng (API).
