@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 Auth::routes(['register'=>false]);
 
 // Reset password
-Route::post('password-reset', 'FrontendController@showResetForm')->name('password.reset'); 
+Route::post('password-reset', 'FrontendController@showResetForm')->name('password.reset');
 
 Route::get('/', function () {
     return redirect('/login');
@@ -37,6 +37,8 @@ Route::get('wishlist-delete/{id}','WishlistController@wishlistDelete')->name('wi
 Route::post('cart/order','OrderController@store')->name('cart.order');
 Route::get('order/pdf/{id}','OrderController@pdf')->name('order.pdf');
 Route::get('/income','OrderController@incomeChart')->name('product.order.income');
+Route::get('/doctorincome','OrderController@doctorincomeChart')->name('product.doctororder.income');
+
 // Route::get('/user/chart','AdminController@userPieChart')->name('user.piechart');
 Route::get('/product-grids','FrontendController@productGrids')->name('product-grids');
 Route::get('/product-lists','FrontendController@productLists')->name('product-lists');
@@ -57,7 +59,7 @@ Route::get('blog-tag/{slug}','FrontendController@blogByTag')->name('blog.tag');
 Route::resource('/review','ProductReviewController');
 Route::post('product/{slug}/review','ProductReviewController@store')->name('review.store');
 
-// Post Comment 
+// Post Comment
 Route::post('post/{slug}/comment','PostCommentController@store')->name('post-comment.store');
 Route::resource('/comment','PostCommentController');
 // Coupon
@@ -120,7 +122,7 @@ Route::group(['prefix'=>'/admin','middleware'=>['auth','admin']],function(){
     // Password Change
     Route::get('change-password', 'AdminController@changePassword')->name('change.password.form');
     Route::post('change-password', 'AdminController@changPasswordStore')->name('change.password');
-   
+
     //Ajax
     Route::post('ajax/route', 'AjaxController@method')->middleware('verify.csrf.ajax');
 

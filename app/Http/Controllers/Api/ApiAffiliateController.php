@@ -9,10 +9,21 @@ use App\Models\AffiliateLink; // Import model
 
 class ApiAffiliateController extends Controller
 {
-    public function generateLink($product_id) {
-        $doctorID = Auth::id(); // Lấy ID bác sĩ
+    public function generateLink($product_slug) {
+        $doctorID = Auth::id();
 
-        // Kiểm tra xem đã có link Affiliate cho bác sĩ và sản phẩm này chưa
+        // Tìm product_id từ slug
+        $product = \App\Models\Product::where('slug', $product_slug)->first();
+
+        if (!$product) {
+            return response()->json([
+                'message' => 'Sản phẩm không tồn tại!',
+            ], 404);
+        }
+
+        $product_id = $product->id;
+
+        // Kiểm tra xem link đã tồn tại chưa
         $existingLink = AffiliateLink::where('doctor_id', $doctorID)
                                     ->where('product_id', $product_id)
                                     ->first();
@@ -20,25 +31,22 @@ class ApiAffiliateController extends Controller
         if ($existingLink) {
             return response()->json([
                 'message' => 'Link Affiliate đã tồn tại!',
-                'affiliate_link' => url("/api/product-detail/{$product_id}?ref={$doctorID}"),
+                'affiliate_link' => url("/product-detail/{$product->slug}?ref={$existingLink->hash_ref}"),
                 'data' => $existingLink
             ], 200);
         }
 
-        // Tạo mới link affiliate
-        $affiliate = new AffiliateLink();
-        $affiliate->doctor_id = $doctorID;
-        $affiliate->product_id = $product_id;
-        $affiliate->affiliate_code = strtoupper('AFF-' . uniqid()); // Tạo mã affiliate ngẫu nhiên
-        $affiliate->created_at = now();
-        $affiliate->save();
+        // Tạo mới link affiliate với hash_ref
+        $affiliate = AffiliateLink::createAffiliateLink($doctorID, $product_id);
 
         return response()->json([
             'message' => 'Link Affiliate được tạo và lưu thành công!',
-            'affiliate_link' => url("/api/product-detail/{$product_id}?ref={$doctorID}"),
+            'affiliate_link' => url("/product-detail/{$product->slug}?ref={$affiliate->hash_ref}"),
             'data' => $affiliate
         ], 201);
     }
+
+
 
     public function trackClick(Request $request, $affiliate_code) {
         // Tìm thông tin affiliate link

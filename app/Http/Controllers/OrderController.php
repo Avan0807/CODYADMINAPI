@@ -307,6 +307,35 @@ class OrderController extends Controller
         return $data;
     }
 
+    /**
+     * Lấy dữ liệu thống kê thu nhập theo tháng của doctor (phía admin).
+     */
+    public function doctorincomeChart(Request $request)
+    {
+        $year = \Carbon\Carbon::now()->year;
+
+        // Lấy tổng commission theo từng tháng từ bảng affiliate_orders
+        $items = AffiliateOrder::whereYear('created_at', $year)
+            ->where('status', 'pending') // Hoặc 'completed' nếu cần
+            ->selectRaw('MONTH(created_at) as month, SUM(commission) as total_commission')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        // Tạo mảng kết quả với mặc định 12 tháng (nếu tháng nào không có dữ liệu thì để 0)
+        $result = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $monthName = date('F', mktime(0, 0, 0, $i, 1));
+            $result[$monthName] = 0; // Mặc định nếu không có dữ liệu
+        }
+
+        foreach ($items as $item) {
+            $monthName = date('F', mktime(0, 0, 0, $item->month, 1));
+            $result[$monthName] = $item->total_commission;
+        }
+
+        return response()->json($result);
+    }
 
     //API section
 

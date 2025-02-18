@@ -44,13 +44,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/doctor/generate-link/{product_id}', [ApiAffiliateController::class, 'generateLink']);
+    Route::get('/generate-affiliate-link/{product_slug}', [ApiAffiliateController::class, 'generateLink']);
     Route::get('/doctor/{doctor_id}/orders', [ApiDoctorController::class, 'orders']);
     Route::post('/doctor/request-payout', [ApiDoctorController::class, 'requestPayout']);
     Route::post('/order/storeDoctor', [ApiOrderController::class, 'storeDoctor']);
 });
 Route::get('/affiliate/click/{affiliate_code}', [ApiAffiliateController::class, 'trackClick']);
-Route::get('/product-detail/{product_id}', [ApiProductController::class, 'trackAffiliate']);
+Route::get('/product-detail/{product_slug}', [ApiProductController::class, 'trackAffiliate']);
+
+
 
 
 // AUTHENTICATION ROUTES
