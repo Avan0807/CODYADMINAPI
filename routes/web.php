@@ -124,7 +124,19 @@ Route::group(['prefix'=>'/admin','middleware'=>['auth','admin']],function(){
     //Ajax
     Route::post('ajax/route', 'AjaxController@method')->middleware('verify.csrf.ajax');
 
+    // 📌 **Thêm Routes cho các module mới**
+    // Phòng khám (Clinics)
+    Route::resource('/clinics', 'ClinicController');
 
+    // Quản lý thông báo chiến dịch (Campaign Notifications)
+    Route::resource('/campaign_notifications', 'CampaignNotificationController');
+
+    // Tin tức công ty (Company News)
+    Route::resource('/company_news', 'CompanyNewsController');
+
+
+    Route::get('/affiliate-orders', 'AffiliateOrderController@index')->name('affiliate_orders.index');
+    Route::post('/affiliate-orders/{id}/update-status', 'AffiliateOrderController@updateStatus')->name('admin.affiliate.orders.update');
 });
 
 

@@ -28,7 +28,14 @@
     <li class="nav-item">
         <a class="nav-link" href="{{route('order.index')}}">
             <i class="fas fa-cart-plus"></i>
-            <span>Đặt hàng</span>
+            <span>Đơn Hàng</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('affiliate_orders.index') }}">
+            <i class="fas fa-link"></i>
+            <span>Đơn hàng tiếp thị</span>
         </a>
     </li>
 
@@ -145,21 +152,72 @@
     </div>
     <!-- Doctors -->
     <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#doctorCollapse" aria-expanded="true" aria-controls="doctorCollapse">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#doctorCollapse" aria-expanded="false" aria-controls="doctorCollapse">
             <i class="fas fa-user-md"></i>
             <span>Bác Sĩ</span>
         </a>
-        <div id="doctorCollapse" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div id="doctorCollapse" class="collapse" aria-labelledby="headingDoctor" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Quản lý bác sĩ:</h6>
-                <a class="collapse-item" href="{{route('doctor.index')}}">Danh sách bác sĩ</a>
-                <a class="collapse-item" href="{{route('doctor.create')}}">Thêm bác sĩ</a>
+                <a class="collapse-item" href="{{ route('doctor.index') }}">Danh sách bác sĩ</a>
+                <a class="collapse-item" href="{{ route('doctor.create') }}">Thêm bác sĩ</a>
             </div>
         </div>
     </li>
 
+    <!-- Phòng Khám -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#clinicCollapse" aria-expanded="false" aria-controls="clinicCollapse">
+            <i class="fas fa-hospital"></i>
+            <span>Phòng Khám</span>
+        </a>
+        <div id="clinicCollapse" class="collapse" aria-labelledby="headingClinic" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Quản lý phòng khám:</h6>
+                <a class="collapse-item" href="{{ route('clinics.index') }}">Danh sách phòng khám</a>
+                <a class="collapse-item" href="{{ route('clinics.create') }}">Thêm phòng khám</a>
+            </div>
+        </div>
+    </li>
     <!-- Divider -->
+    <hr class="sidebar-divider">
 
+    <div class="sidebar-heading">
+        Thông báo 
+    </div>
+
+    <!-- Chiến Dịch -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#campaignCollapse" aria-expanded="false" aria-controls="campaignCollapse">
+            <i class="fas fa-bullhorn"></i>
+            <span>Chiến Dịch</span>
+        </a>
+        <div id="campaignCollapse" class="collapse" aria-labelledby="headingCampaign" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Tùy chọn chiến dịch:</h6>
+                <a class="collapse-item" href="{{ route('campaign_notifications.index') }}">Danh sách chiến dịch</a>
+                <a class="collapse-item" href="{{ route('campaign_notifications.create') }}">Thêm chiến dịch</a>
+            </div>
+        </div>
+    </li>
+
+    <!-- Tin tức công ty -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#adsCollapse" aria-expanded="false" aria-controls="adsCollapse">
+            <i class="fas fa-ad"></i>
+            <span>Tin Tức Công Ty</span>
+        </a>
+        <div id="adsCollapse" class="collapse" aria-labelledby="headingAds" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Tùy chọn tin tức:</h6>
+                <a class="collapse-item" href="{{ route('company_news.index') }}">Danh sách tin tức</a>
+                <a class="collapse-item" href="{{ route('company_news.create') }}">Thêm tin tức</a>
+            </div>
+        </div>
+    </li>
+
+
+    <!-- Divider -->
     <hr class="sidebar-divider">
 
     <!-- Heading -->

@@ -48,5 +48,18 @@ class Order extends Model
         return $data;
     }
 
+    public static function countAffiliateOrders()
+    {
+        return self::whereNotNull('doctor_id')->count();
+    }
+    
+    public static function totalAffiliateCommission()
+    {
+        return self::whereNotNull('doctor_id')->sum('commission');
+    }
+    public function affiliateOrder()
+    {
+        return $this->hasOne(AffiliateOrder::class);
+    }
 
 }

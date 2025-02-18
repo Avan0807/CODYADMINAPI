@@ -33,5 +33,9 @@ class Doctor extends Authenticatable
     {
         return $this->hasMany(Appointment::class, 'doctor_id');
     }
-    
+    public function affiliateOrders()
+    {
+        return $this->hasMany(AffiliateOrder::class);
+    }
+
 }
