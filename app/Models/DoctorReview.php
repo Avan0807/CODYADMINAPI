@@ -4,20 +4,28 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class DoctorReview extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['doctor_id', 'user_id', 'rating', 'review'];
+    protected $table = 'doctor_reviews';
 
-    public function doctor()
-    {
-        return $this->belongsTo(Doctor::class);
-    }
+    protected $fillable = [
+        'doctor_id',
+        'user_id',
+        'rating',
+        'review',
+    ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class);
     }
 }

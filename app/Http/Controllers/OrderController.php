@@ -7,6 +7,7 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Shipping;
 use App\Models\User;
+use App\Models\AffiliateOrder;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Helper;
 use Illuminate\Support\Str;
@@ -279,50 +280,52 @@ class OrderController extends Controller
     public function incomeChart(Request $request)
     {
         $year = \Carbon\Carbon::now()->year;
-        $items = Order::with(['cart_info'])
-            ->whereYear('created_at', $year)
-            ->where('status', 'delivered')
-            ->get()
-            ->groupBy(function ($d) {
-                return \Carbon\Carbon::parse($d->created_at)->format('m');
-            });
 
+        $items = Order::whereYear('created_at', $year)
+            ->where('status', 'delivered') // Chỉ lấy đơn hàng đã giao
+            ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as total_income')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        // Khởi tạo mảng kết quả với 12 tháng mặc định là 0
         $result = [];
-        foreach ($items as $month => $item_collections) {
-            foreach ($item_collections as $item) {
-                $amount = $item->cart_info->sum('amount');
-                $m = intval($month);
-                isset($result[$m]) ? $result[$m] += $amount : $result[$m] = $amount;
-            }
-        }
-
-        $data = [];
         for ($i = 1; $i <= 12; $i++) {
             $monthName = date('F', mktime(0, 0, 0, $i, 1));
-            $data[$monthName] = (!empty($result[$i]))
-                ? number_format((float)($result[$i]), 2, '.', '')
-                : 0.0;
+            $result[$monthName] = 0;
         }
 
-        return $data;
+        // Gán dữ liệu vào mảng kết quả
+        foreach ($items as $item) {
+            $monthName = date('F', mktime(0, 0, 0, $item->month, 1));
+            $result[$monthName] = (float) $item->total_income;
+        }
+
+        \Log::info("Income Chart Data:", $result);
+        return response()->json($result);
     }
+
 
     /**
      * Lấy dữ liệu thống kê thu nhập theo tháng của doctor (phía admin).
      */
     public function doctorincomeChart(Request $request)
     {
-        $year = \Carbon\Carbon::now()->year;
+        // Lấy năm mới nhất có dữ liệu trong bảng
+        $latestYear = AffiliateOrder::selectRaw('YEAR(created_at) as year')
+            ->orderBy('year', 'desc')
+            ->limit(1)
+            ->pluck('year')
+            ->first() ?? \Carbon\Carbon::now()->year; // Nếu không có dữ liệu, lấy năm hiện tại
 
-        // Lấy tổng commission theo từng tháng từ bảng affiliate_orders
-        $items = AffiliateOrder::whereYear('created_at', $year)
-            ->where('status', 'pending') // Hoặc 'completed' nếu cần
+            $items = AffiliateOrder::whereYear('created_at', $latestYear)
+            ->whereIn('status', ['delivered']) // Chỉ lấy trạng thái hợp lệ
             ->selectRaw('MONTH(created_at) as month, SUM(commission) as total_commission')
             ->groupBy('month')
             ->orderBy('month')
             ->get();
 
-        // Tạo mảng kết quả với mặc định 12 tháng (nếu tháng nào không có dữ liệu thì để 0)
+
         $result = [];
         for ($i = 1; $i <= 12; $i++) {
             $monthName = date('F', mktime(0, 0, 0, $i, 1));
@@ -331,11 +334,13 @@ class OrderController extends Controller
 
         foreach ($items as $item) {
             $monthName = date('F', mktime(0, 0, 0, $item->month, 1));
-            $result[$monthName] = $item->total_commission;
+            $result[$monthName] = intval($item->total_commission);
         }
 
         return response()->json($result);
     }
+
+
 
     //API section
 

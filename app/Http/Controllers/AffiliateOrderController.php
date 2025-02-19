@@ -15,28 +15,40 @@ class AffiliateOrderController extends Controller
      */
     public function index()
     {
-        // Make sure the affiliateOrders are being retrieved correctly
-        $affiliateOrders = AffiliateOrder::with(['order', 'doctor'])->latest()->paginate(10);
-        
+        $affiliateOrders = AffiliateOrder::whereHas('order', function ($query) {
+            $query->whereNotNull('doctor_id');
+        })->with(['doctor', 'order'])->paginate(10);
+
         return view('backend.affiliate_orders.index', compact('affiliateOrders'));
     }
-    
+
 
     /**
      * Cập nhật trạng thái đơn hàng Affiliate.
      */
+
     public function updateStatus(Request $request, $id)
     {
         $affiliateOrder = AffiliateOrder::findOrFail($id);
 
-        $validStatuses = ['pending', 'approved', 'paid', 'rejected'];
+        // Chỉ chấp nhận trạng thái hợp lệ
+        $validStatuses = ['new', 'process', 'delivered', 'cancel'];
         if (!in_array($request->status, $validStatuses)) {
             return redirect()->back()->with('error', 'Trạng thái không hợp lệ!');
         }
 
+        // Cập nhật trạng thái đơn hàng Affiliate
         $affiliateOrder->status = $request->status;
         $affiliateOrder->save();
 
+        // Đồng bộ trạng thái của Order
+        $order = Order::find($affiliateOrder->order_id);
+        if ($order) {
+            $order->status = $request->status;
+            $order->save();
+        }
+
         return redirect()->back()->with('success', 'Cập nhật trạng thái thành công!');
     }
+
 }

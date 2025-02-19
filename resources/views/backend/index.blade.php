@@ -203,7 +203,7 @@
       </div>
     </div>
 
-    <!-- Pie Chart Thu nhập theo bác sĩ -->
+    <!-- Area Chart  Thu nhập theo bác sĩ -->
     <div class="col-xl-8 col-lg-7">
         <div class="card shadow mb-4">
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -211,7 +211,7 @@
             </div>
             <div class="card-body">
                 <div class="chart-area">
-                    <canvas id="myDoctorIncomeChart"></canvas> <!-- Đổi ID -->
+                    <canvas id="myAreaChartDoctor"></canvas>
                 </div>
             </div>
         </div>
@@ -246,7 +246,8 @@
 
   {{-- line chart --}}
   <script type="text/javascript">
-    const url = "{{route('product.order.income')}}";
+    const incomeUrl = "{{route('product.order.income')}}";
+
     // Set new default font family and font color to mimic Bootstrap's default styling
     Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
     Chart.defaults.global.defaultFontColor = '#858796';
@@ -277,110 +278,99 @@
     }
 
       // Area Chart Example
-      var ctx = document.getElementById("myAreaChart");
+      document.addEventListener("DOMContentLoaded", function() {
+        var ctx = document.getElementById("myAreaChart");
+        if (!ctx) {
+            console.error("Không tìm thấy canvas myAreaChart");
+            return;
+        }
 
-        axios.get(url)
-              .then(function (response) {
-                const data_keys = Object.keys(response.data);
-                const data_values = Object.values(response.data);
-                var myLineChart = new Chart(ctx, {
-                  type: 'line',
-                  data: {
-                    labels: data_keys, // ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                    datasets: [{
-                      label: "Thu nhập",
-                      lineTension: 0.3,
-                      backgroundColor: "rgba(78, 115, 223, 0.05)",
-                      borderColor: "rgba(78, 115, 223, 1)",
-                      pointRadius: 3,
-                      pointBackgroundColor: "rgba(78, 115, 223, 1)",
-                      pointBorderColor: "rgba(78, 115, 223, 1)",
-                      pointHoverRadius: 3,
-                      pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-                      pointHoverBorderColor: "rgba(78, 115, 223, 1)",
-                      pointHitRadius: 10,
-                      pointBorderWidth: 2,
-                      data:data_values,// [0, 10000, 5000, 15000, 10000, 20000, 15000, 25000, 20000, 30000, 25000, 40000],
-                    }],
-                  },
-                  options: {
-                    maintainAspectRatio: false,
-                    layout: {
-                      padding: {
-                        left: 10,
-                        right: 25,
-                        top: 25,
-                        bottom: 0
-                      }
-                    },
-                    scales: {
-                      xAxes: [{
-                        time: {
-                          unit: 'date'
-                        },
-                        gridLines: {
-                          display: false,
-                          drawBorder: false
-                        },
-                        ticks: {
-                          maxTicksLimit: 7
-                        }
-                      }],
-                      yAxes: [{
-                          ticks: {
-                            min: -10000000,
-                            max:  10000000,
-                            stepSize: 5000000,
-                            callback: function(value) {
-                              return value.toLocaleString('vi-VN') + 'đ';
-                          }
-                        },
-                        gridLines: {
-                          color: "rgb(234, 236, 244)",
-                          zeroLineColor: "rgb(234, 236, 244)",
-                          drawBorder: false,
-                          borderDash: [2],
-                          zeroLineBorderDash: [2]
-                        }
-                      }],
-                    },
-                    legend: {
-                      display: false
-                    },
-                    tooltips: {
-                      backgroundColor: "rgb(255,255,255)",
-                      bodyFontColor: "#858796",
-                      titleMarginBottom: 10,
-                      titleFontColor: '#6e707e',
-                      titleFontSize: 14,
-                      borderColor: '#dddfeb',
-                      borderWidth: 1,
-                      xPadding: 15,
-                      yPadding: 15,
-                      displayColors: false,
-                      intersect: false,
-                      mode: 'index',
-                      caretPadding: 10,
-                      callbacks: {
-                        label: function(tooltipItem, chart) {
-                          var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
-                          return datasetLabel + ':' + number_format(tooltipItem.yLabel) +'đ';
-                        }
-                      }
+        axios.get("{{ route('product.order.income') }}")
+        .then(response => {
+
+            const data_keys = Object.keys(response.data);
+            const data_values = Object.values(response.data).map(value => Number(value));
+
+
+            var myLineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data_keys,
+                datasets: [{
+                label: "Tổng quan thu nhập",
+                data: data_values,
+                backgroundColor: "rgba(78, 115, 223, 0.05)",
+                borderColor: "rgba(78, 115, 223, 1)",
+                pointRadius: 4,
+                pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                pointBorderColor: "rgba(78, 115, 223, 1)",
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                lineTension: 0.3
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                layout: {
+                padding: { left: 10, right: 25, top: 25, bottom: 0 }
+                },
+                scales: {
+                xAxes: [{
+                    gridLines: { display: false, drawBorder: false },
+                    ticks: { maxTicksLimit: 12 }
+                }],
+                yAxes: [{
+                    ticks: {
+                    min: 0,
+                    max: Math.max(...data_values) * 1.2,
+                    stepSize: Math.max(...data_values) / 5,
+                    callback: function(value) {
+                        return value.toLocaleString('vi-VN') + ' đ';
                     }
-                  }
-                });
-              })
-              .catch(function (error) {
-              //   vm.answer = 'Error! Could not reach the API. ' + error
-              console.log(error)
-              });
+                    },
+                    gridLines: {
+                    color: "rgb(234, 236, 244)",
+                    zeroLineColor: "rgb(234, 236, 244)",
+                    drawBorder: false,
+                    borderDash: [2],
+                    zeroLineBorderDash: [2]
+                    }
+                }],
+                },
+                legend: { display: false },
+                tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                intersect: false,
+                mode: 'index',
+                caretPadding: 10,
+                callbacks: {
+                    label: function(tooltipItem, chart) {
+                    var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                    return datasetLabel + ': ' + tooltipItem.yLabel.toLocaleString('vi-VN') + ' đ';
+                    }
+                }
+                }
+            }
+            });
+        })
+        .catch(error => console.error("Lỗi API Tổng quan thu nhập:", error));
+    });
 
   </script>
 
   {{-- line chart --}}
   <script type="text/javascript">
-    const url = "{{route('product.doctororder.income')}}";
+    const doctorincomeurl = "{{route('product.doctororder.income')}}";
     // Set new default font family and font color to mimic Bootstrap's default styling
     Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
     Chart.defaults.global.defaultFontColor = '#858796';
@@ -410,105 +400,94 @@
       return s.join(dec);
     }
 
-      // Area Chart Example
-      var ctx = document.getElementById("myPieChartDoctor");
+    document.addEventListener("DOMContentLoaded", function() {
+    var ctxDoctor = document.getElementById("myAreaChartDoctor");
+    if (!ctxDoctor) {
+        console.error("Không tìm thấy canvas myAreaChartDoctor");
+        return;
+    }
 
-        axios.get(url)
-              .then(function (response) {
-                const data_keys = Object.keys(response.data);
-                const data_values = Object.values(response.data);
-                var myLineChart = new Chart(ctx, {
-                  type: 'line',
-                  data: {
-                    labels: data_keys, // ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                    datasets: [{
-                      label: "Thu nhập",
-                      lineTension: 0.3,
-                      backgroundColor: "rgba(78, 115, 223, 0.05)",
-                      borderColor: "rgba(78, 115, 223, 1)",
-                      pointRadius: 3,
-                      pointBackgroundColor: "rgba(78, 115, 223, 1)",
-                      pointBorderColor: "rgba(78, 115, 223, 1)",
-                      pointHoverRadius: 3,
-                      pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-                      pointHoverBorderColor: "rgba(78, 115, 223, 1)",
-                      pointHitRadius: 10,
-                      pointBorderWidth: 2,
-                      data:data_values,// [0, 10000, 5000, 15000, 10000, 20000, 15000, 25000, 20000, 30000, 25000, 40000],
-                    }],
-                  },
-                  options: {
-                    maintainAspectRatio: false,
-                    layout: {
-                      padding: {
-                        left: 10,
-                        right: 25,
-                        top: 25,
-                        bottom: 0
-                      }
-                    },
-                    scales: {
-                      xAxes: [{
-                        time: {
-                          unit: 'date'
-                        },
-                        gridLines: {
-                          display: false,
-                          drawBorder: false
-                        },
-                        ticks: {
-                          maxTicksLimit: 7
-                        }
-                      }],
-                      yAxes: [{
-                          ticks: {
-                            min: -10000000,
-                            max:  10000000,
-                            stepSize: 5000000,
-                            callback: function(value) {
-                              return value.toLocaleString('vi-VN') + 'đ';
-                          }
-                        },
-                        gridLines: {
-                          color: "rgb(234, 236, 244)",
-                          zeroLineColor: "rgb(234, 236, 244)",
-                          drawBorder: false,
-                          borderDash: [2],
-                          zeroLineBorderDash: [2]
-                        }
-                      }],
-                    },
-                    legend: {
-                      display: false
-                    },
-                    tooltips: {
-                      backgroundColor: "rgb(255,255,255)",
-                      bodyFontColor: "#858796",
-                      titleMarginBottom: 10,
-                      titleFontColor: '#6e707e',
-                      titleFontSize: 14,
-                      borderColor: '#dddfeb',
-                      borderWidth: 1,
-                      xPadding: 15,
-                      yPadding: 15,
-                      displayColors: false,
-                      intersect: false,
-                      mode: 'index',
-                      caretPadding: 10,
-                      callbacks: {
-                        label: function(tooltipItem, chart) {
-                          var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
-                          return datasetLabel + ':' + number_format(tooltipItem.yLabel) +'đ';
-                        }
-                      }
-                    }
+    axios.get("{{ route('product.doctororder.income') }}")
+      .then(response => {
+
+        const data_keys = Object.keys(response.data);
+        const data_values = Object.values(response.data).map(value => Number(value));
+
+
+        new Chart(ctxDoctor, {
+          type: 'line',
+          data: {
+            labels: data_keys,
+            datasets: [{
+              label: "Thu nhập theo bác sĩ",
+              data: data_values,
+              backgroundColor: "rgba(78, 115, 223, 0.05)",
+              borderColor: "rgba(78, 115, 223, 1)",
+              pointRadius: 4,
+              pointBackgroundColor: "rgba(78, 115, 223, 1)",
+              pointBorderColor: "rgba(78, 115, 223, 1)",
+              pointHoverRadius: 5,
+              pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+              pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+              lineTension: 0.3
+            }],
+          },
+          options: {
+            maintainAspectRatio: false,
+            layout: {
+              padding: { left: 10, right: 25, top: 25, bottom: 0 }
+            },
+            scales: {
+              xAxes: [{
+                gridLines: { display: false, drawBorder: false },
+                ticks: { maxTicksLimit: 12 }
+              }],
+              yAxes: [{
+                ticks: {
+                  min: 0,
+                  max: Math.max(...data_values) * 1.2,
+                  stepSize: Math.max(...data_values) / 5,
+                  callback: function(value) {
+                    return value.toLocaleString('vi-VN') + 'đ';
                   }
-                });
-              })
-              .catch(function (error) {
-              //   vm.answer = 'Error! Could not reach the API. ' + error
-              console.log(error)
-              });
+                },
+                gridLines: {
+                  color: "rgb(234, 236, 244)",
+                  zeroLineColor: "rgb(234, 236, 244)",
+                  drawBorder: false,
+                  borderDash: [2],
+                  zeroLineBorderDash: [2]
+                }
+              }],
+            },
+            legend: { display: false },
+            tooltips: {
+              backgroundColor: "rgb(255,255,255)",
+              bodyFontColor: "#858796",
+              titleMarginBottom: 10,
+              titleFontColor: '#6e707e',
+              titleFontSize: 14,
+              borderColor: '#dddfeb',
+              borderWidth: 1,
+              xPadding: 15,
+              yPadding: 15,
+              displayColors: false,
+              intersect: false,
+              mode: 'index',
+              caretPadding: 10,
+              callbacks: {
+                label: function(tooltipItem, chart) {
+                  var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                  return datasetLabel + ': ' + tooltipItem.yLabel.toLocaleString('vi-VN') + 'đ';
+                }
+              }
+            }
+          }
+        });
+      })
+      .catch(error => console.error("Lỗi API Thu nhập theo bác sĩ:", error));
+});
+
 
   </script>
 @endpush

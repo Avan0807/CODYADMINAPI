@@ -31,8 +31,18 @@ class AffiliateOrder extends Model
      */
     public function doctor()
     {
-        return $this->belongsTo(Doctor::class);
+        return $this->hasOneThrough(
+            Doctor::class,
+            Order::class,
+            'id', // Khóa chính của bảng `orders`
+            'id', // Khóa chính của bảng `doctors`
+            'order_id', // Khóa ngoại trong bảng `affiliate_orders` trỏ đến `orders`
+            'doctor_id' // Khóa ngoại trong bảng `orders` trỏ đến `doctors`
+        );
     }
+    protected $casts = [
+        'status' => 'string', // Chuyển ENUM thành string khi truy xuất
+    ];
 
     /**
      * Đếm tổng số đơn hàng tiếp thị

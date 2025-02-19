@@ -52,7 +52,7 @@ class Order extends Model
     {
         return self::whereNotNull('doctor_id')->count();
     }
-    
+
     public static function totalAffiliateCommission()
     {
         return self::whereNotNull('doctor_id')->sum('commission');
@@ -60,6 +60,10 @@ class Order extends Model
     public function affiliateOrder()
     {
         return $this->hasOne(AffiliateOrder::class);
+    }
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class, 'doctor_id');
     }
 
 }

@@ -26,6 +26,14 @@ use App\Http\Controllers\Api\ApiReviewDoctorController;
 use App\Http\Controllers\Api\ApiAffiliateController;
 use App\Http\Controllers\Api\ApiOrderController;
 use App\Http\Controllers\Api\ApiCartController;
+use App\Http\Controllers\Api\ApiDoctorReviewController;
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('doctor-reviews', [ApiDoctorReviewController::class, 'store']); // Đăng đánh giá
+    Route::delete('doctor-reviews/{id}', [ApiDoctorReviewController::class, 'destroy']); // Xóa đánh giá
+});
+
+Route::get('doctor-reviews/{doctor_id}', [ApiDoctorReviewController::class, 'index']); // Lấy danh sách đánh giá
 
 
 Route::middleware('auth:sanctum')->group(function () {
