@@ -52,7 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/generate-affiliate-link/{product_slug}', [ApiAffiliateController::class, 'generateLink']);
+    Route::get('/generate-link/{product_slug}', [ApiAffiliateController::class, 'generateLink']);
     Route::get('/doctor/{doctor_id}/orders', [ApiDoctorController::class, 'orders']);
     Route::post('/doctor/request-payout', [ApiDoctorController::class, 'requestPayout']);
     Route::post('/order/storeDoctor', [ApiOrderController::class, 'storeDoctor']);
