@@ -206,28 +206,23 @@ class ApiProductController extends Controller
     }
     public function trackAffiliate(Request $request, $product_slug)
     {
-        // Tìm sản phẩm theo slug
-        $product = Product::where('slug', $product_slug)->first();
-
-        if (!$product) {
-            return response()->json(['error' => 'Sản phẩm không tồn tại'], 404);
-        }
-
-        // Kiểm tra xem có ref (hash_ref) không
+        // Tìm sản phẩm theo slug, nếu không có trả về lỗi 404
+        $product = Product::where('slug', $product_slug)->firstOrFail();
+    
+        // Kiểm tra ref (hash_ref) trong URL
         if ($request->has('ref')) {
             $affiliate = AffiliateLink::findByHash($request->query('ref'));
-
+    
             if ($affiliate) {
-                session(['doctor_ref' => $affiliate->doctor_id]);
+                session(['doctor_ref' => $affiliate->doctor_id]); // Lưu vào session
             }
         }
-
+    
         return response()->json([
             'message' => 'Thông tin sản phẩm và affiliate reference được lưu',
             'product' => $product,
             'doctor_id' => session('doctor_ref') ?? null
         ], 200);
     }
-
 
 }

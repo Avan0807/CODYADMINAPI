@@ -12,41 +12,33 @@ class ApiAffiliateController extends Controller
     public function generateLink($product_slug) {
         $doctorID = Auth::id();
     
-        // Tìm product_id từ slug
-        $product = \App\Models\Product::where('slug', $product_slug)->first();
-    
-        if (!$product) {
-            return response()->json([
-                'message' => 'Sản phẩm không tồn tại!',
-            ], 404);
-        }
-    
-        $product_id = $product->id;
+        // Tìm sản phẩm theo slug
+        $product = \App\Models\Product::where('slug', $product_slug)->firstOrFail();
     
         // Kiểm tra xem link đã tồn tại chưa
-        $existingLink = AffiliateLink::where('doctor_id', $doctorID)
-                                    ->where('product_id', $product_id)
-                                    ->first();
+        $existingLink = AffiliateLink::where([
+            ['doctor_id', $doctorID],
+            ['product_id', $product->id]
+        ])->first();
     
         if ($existingLink) {
             return response()->json([
                 'message' => 'Link Affiliate đã tồn tại!',
-                'affiliate_link' => "http://toikhoe.vn/product-detail/{$product->slug}?ref={$existingLink->hash_ref}",
+                'affiliate_link' => url("http://toikhoe.vn/product-detail/{$product->slug}?ref={$existingLink->hash_ref}"),
                 'data' => $existingLink
             ], 200);
         }
     
-        // Tạo mới link affiliate với hash_ref
-        $affiliate = AffiliateLink::createAffiliateLink($doctorID, $product_id);
+        // Tạo mới link affiliate
+        $affiliate = AffiliateLink::createAffiliateLink($doctorID, $product->id);
     
         return response()->json([
-            'message' => 'Link Affiliate được tạo và lưu thành công!',
-            'affiliate_link' => "http://toikhoe.vn/product-detail/{$product->slug}?ref={$affiliate->hash_ref}",
+            'message' => 'Link Affiliate được tạo thành công!',
+            'affiliate_link' => url("http://toikhoe.vn/product-detail/{$product->slug}?ref={$affiliate->hash_ref}"),
             'data' => $affiliate
         ], 201);
     }
-
-
+    
 
     public function trackClick(Request $request, $affiliate_code) {
         // Tìm thông tin affiliate link

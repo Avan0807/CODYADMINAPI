@@ -18,7 +18,6 @@ class AffiliateLink extends Model
     protected $fillable = [
         'doctor_id',
         'product_id',
-        'affiliate_code',
         'hash_ref'
     ];
 
@@ -43,16 +42,15 @@ class AffiliateLink extends Model
      */
     public static function createAffiliateLink($doctorId, $productId)
     {
-        $affiliateCode = 'AFF-' . strtoupper(bin2hex(random_bytes(5))); // Mã gốc
         $hashRef = hash('sha256', $doctorId . $productId . time()); // Mã hash an toàn
-
+    
         return self::create([
             'doctor_id' => $doctorId,
             'product_id' => $productId,
-            'affiliate_code' => $affiliateCode, // Vẫn lưu affiliate_code nếu cần
-            'hash_ref' => $hashRef, // Thêm cột hash_ref
+            'hash_ref' => $hashRef // Chỉ lưu hash_ref
         ]);
     }
+    
 
     /**
      * Kiểm tra xem link affiliate có tồn tại không
