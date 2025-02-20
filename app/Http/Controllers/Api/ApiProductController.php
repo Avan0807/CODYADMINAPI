@@ -204,6 +204,73 @@ class ApiProductController extends Controller
             'message' => 'Sản phẩm đã được xóa thành công!'
         ], 200);
     }
+
+    /**
+     * Tìm sản phẩm theo slug.
+     */
+    public function findBySlug($slug)
+    {
+        $product = Product::where('slug', $slug)
+            ->with(['cat_info', 'sub_cat_info']) // Load danh mục và danh mục con
+            ->first();
+    
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sản phẩm không tồn tại!'
+            ], 404);
+        }
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Chi tiết sản phẩm',
+            'data' => [
+                'id' => $product->id,
+                'title' => $product->title,
+                'slug' => $product->slug,
+                'summary' => $product->summary,
+                'description' => $product->description,
+                'photo' => $product->photo,
+                'stock' => $product->stock,
+                'size' => $product->size,
+                'condition' => $product->condition,
+                'status' => $product->status,
+                'price' => $product->price,
+                'discount' => $product->discount,
+                'is_featured' => $product->is_featured,
+                'cat_id' => $product->cat_id,
+                'child_cat_id' => $product->child_cat_id,
+                'brand_id' => $product->brand_id,
+                'created_at' => $product->created_at,
+                'updated_at' => $product->updated_at,
+                'cat_info' => $product->cat_info ? [
+                    'id' => $product->cat_info->id,
+                    'title' => $product->cat_info->title,
+                    'slug' => $product->cat_info->slug,
+                    'summary' => $product->cat_info->summary,
+                    'photo' => $product->cat_info->photo,
+                    'is_parent' => $product->cat_info->is_parent,
+                    'parent_id' => $product->cat_info->parent_id,
+                    'status' => $product->cat_info->status,
+                    'created_at' => $product->cat_info->created_at,
+                    'updated_at' => $product->cat_info->updated_at,
+                ] : null,
+                'sub_cat_info' => $product->sub_cat_info ? [
+                    'id' => $product->sub_cat_info->id,
+                    'title' => $product->sub_cat_info->title,
+                    'slug' => $product->sub_cat_info->slug,
+                    'summary' => $product->sub_cat_info->summary,
+                    'photo' => $product->sub_cat_info->photo,
+                    'is_parent' => $product->sub_cat_info->is_parent,
+                    'parent_id' => $product->sub_cat_info->parent_id,
+                    'status' => $product->sub_cat_info->status,
+                    'created_at' => $product->sub_cat_info->created_at,
+                    'updated_at' => $product->sub_cat_info->updated_at,
+                ] : null
+            ]
+        ], 200);
+    }
+    
     public function trackAffiliate(Request $request, $product_slug)
     {
         // Tìm sản phẩm theo slug, nếu không có trả về lỗi 404

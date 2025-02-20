@@ -157,6 +157,8 @@ Route::get('/products', [ProductController::class, 'apiGetAllProducts']);
 Route::get('/products/{id}', [ProductController::class, 'apiGetProductById']);
 Route::post('/productsadd', [ApiProductController::class, 'store']);
 
+Route::get('/products/slug/{slug}', [ApiProductController::class, 'findBySlug']);
+
 // APPOINTMENT ROUTES
 
 //Get all appointment

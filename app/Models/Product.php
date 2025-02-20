@@ -9,11 +9,12 @@ class Product extends Model
     protected $fillable=['title','slug','summary','description','cat_id','child_cat_id','price','brand_id','discount','status','photo','size','stock','is_featured','condition'];
 
     public function cat_info(){
-        return $this->hasOne('App\Models\Category','id','cat_id');
+        return $this->belongsTo('App\Models\Category', 'cat_id');
     }
     public function sub_cat_info(){
-        return $this->hasOne('App\Models\Category','id','child_cat_id');
+        return $this->belongsTo('App\Models\Category', 'child_cat_id');
     }
+    
     public static function getAllProduct(){
         return Product::with(['cat_info','sub_cat_info'])->orderBy('id','desc')->paginate(10);
     }
